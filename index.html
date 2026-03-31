@@ -400,12 +400,20 @@ async function exportWord() {
     // 10. 구매자 사업자번호
     xml = replaceInXml(xml, "106-81-97189", val("bBiz") || "106-81-97189", 1);
 
-    // 11. 구매자 성명 (원본에 빈칸) — 성명/직책 셀 뒤 (인) 앞에 삽입
-    const repName = val("bRep");
-    if (repName) {
-      xml = xml.replace(/(성명<\/w:t>.*?직책<\/w:t>.*?<\/w:tc>.*?<w:tc>.*?<w:t[^>]*>)([ ]+)/s,
-        (m, before, spaces) => before + repName + "   ");
-    }
+    // 11. 구매자 성명 — 공백 run들을 이름으로 교체
+    // 원본 셀: [' ']['   ']['              '][' ']['     (']['인'][') ']
+    // 이 패턴은 문서에서 이 위치에만 존재하므로 단순 문자열 치환으로 처리
+    const repName = val("bRep") || "";
+    // run1(' ') → 이름으로, run2('   ') → 빈칸, run3('              ') → 빈칸, run4(' ') → 빈칸
+    xml = xml
+      .replace('xml:space="preserve"> </w:t></w:r><w:r w:rsidR="00E24BF4">', 
+               `xml:space="preserve">${repName}</w:t></w:r><w:r w:rsidR="00E24BF4">`)
+      .replace('xml:space="preserve">   </w:t>',
+               'xml:space="preserve"></w:t>')
+      .replace(
+        'xml:space="preserve">              </w:t></w:r><w:r w:rsidRPr="008A09BA"><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr><w:t xml:space="preserve"> </w:t>',
+        'xml:space="preserve"></w:t></w:r><w:r w:rsidRPr="008A09BA"><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr><w:t xml:space="preserve">'
+      );
 
     // 12. ZIP 업데이트 후 blob 생성
     zip.file("word/document.xml", xml);
