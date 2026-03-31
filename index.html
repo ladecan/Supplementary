@@ -146,7 +146,8 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
       <button class="chip" onclick="setBuyer('custom',this)">직접 입력</button>
     </div>
     <div class="f"><label>회사 / 병원명 <span class="req">*</span></label><input type="text" id="bName" oninput="markCustom();render()"></div>
-    <div class="f"><label>주소</label><input type="text" id="bAddr" oninput="render()"></div>
+    <div class="f"><label>주소 1줄</label><input type="text" id="bAddr1" oninput="render()"></div>
+    <div class="f"><label>주소 2줄</label><input type="text" id="bAddr2" oninput="render()"></div>
     <div class="row2">
       <div class="f"><label>성명 / 직책</label><input type="text" id="bRep" oninput="render()"></div>
       <div class="f"><label>사업자등록번호</label><input type="text" id="bBiz" oninput="render()"></div>
@@ -191,8 +192,8 @@ const NAMES_A=["GMPP DCD Small","GMPP DCD Medium","GMPP DCD Large","GMPP ACC Lar
 const NO2N={"7123-CE-0650":"GMPP DCD Small","7123-CE-0632":"GMPP DCD Medium","7123-CE-0652":"GMPP DCD Large","7123-CE-0653":"GMPP ACC Large","FIN100834":"Zimmer Cryo7","FIN101958":"GMPP Modified LSDS Options Kit for DCD","FIN101959":"GMPP Modified LSDS Options Kit for ACC"};
 const N2NO=Object.fromEntries(Object.entries(NO2N).map(([k,v])=>[v,k]));
 const BUYERS={
-  inomed:{name:"㈜이노메드",addr:"서울시 용산구 한강대로 257 2층,4층(갈월동,청룡빌딩) (04322)",rep:"변승환",biz:"106-81-97189"},
-  sevenu:{name:"쎄븐유",addr:"",rep:"",biz:""}
+  inomed:{name:"㈜이노메드",addr1:"서울시 용산구 한강대로 257 ",addr2:"2층,4층(갈월동,청룡빌딩) (04322)",rep:"변승환",biz:"106-81-97189"},
+  sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111,",addr2:"부산지식산업센터 102 호(46508)",rep:"이호재 사장님",biz:""}
 };
 
 let bIt=[{no:"7123-CE-0650",name:"GMPP DCD Small",qty:1},{no:"7123-CE-0632",name:"GMPP DCD Medium",qty:1},{no:"7123-CE-0653",name:"GMPP ACC Large",qty:1}];
@@ -206,7 +207,7 @@ function fmtAmt(el){const n=el.value.replace(/[^0-9]/g,"");el.value=n?parseInt(n
 function dateKo(s){if(!s)return"";const[y,m,d]=s.split("-");return`${y}년 ${+m}월 ${+d}일`;}
 function toast(msg,ok=true){const t=$("toast");t.textContent=msg;t.style.background=ok?"#1e3a5f":"#8b2030";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2800);}
 
-function setBuyer(key,btn){document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));btn.classList.add("on");if(key==="custom"){set("bName","");set("bAddr","");set("bRep","");set("bBiz","");$("bName").focus();}else{const d=BUYERS[key];set("bName",d.name);set("bAddr",d.addr);set("bRep",d.rep);set("bBiz",d.biz);}render();}
+function setBuyer(key,btn){document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));btn.classList.add("on");if(key==="custom"){set("bName","");set("bAddr1","");set("bAddr2","");set("bRep","");set("bBiz","");$("bName").focus();}else{const d=BUYERS[key];set("bName",d.name);set("bAddr1",d.addr1||d.addr||"");set("bAddr2",d.addr2||"");set("bRep",d.rep);set("bBiz",d.biz);}render();}
 function markCustom(){document.querySelectorAll(".chip").forEach((c,i)=>c.classList.toggle("on",i===2));}
 
 function numOpts(nums,sel){return`<option value="">— 선택 —</option>`+nums.map(n=>`<option value="${n}"${sel===n?" selected":""}>${n}</option>`).join("")+`<option value="__"${sel==="__"?" selected":""}>직접 입력</option>`;}
@@ -247,7 +248,7 @@ function addRow(t){if(t==="b"){bIt.push({no:"",name:"",qty:1});renderRows(bIt,"b
 function tblH(arr){const rows=arr.map(r=>`<tr><td class="c">${esc(r.no)}</td><td>${esc(r.name)}</td><td class="c">${r.qty}</td></tr>`).join("");return`<table class="doc-tbl"><thead><tr><th style="width:150px">구성품 번호</th><th>구성품</th><th style="width:55px">수량</th></tr></thead><tbody>${rows}</tbody></table>`;}
 
 function render(){
-  const sn=val("sName"),bn=val("bName"),sa=val("sAddr"),ba=val("bAddr"),sr=val("sRep"),br=val("bRep"),sbiz=val("sBiz"),bbiz=val("bBiz"),scorp=val("sCorp"),am=val("amt");
+  const sn=val("sName"),bn=val("bName"),sa=val("sAddr"),ba1=val("bAddr1"),ba2=val("bAddr2"),sr=val("sRep"),br=val("bRep"),sbiz=val("sBiz"),bbiz=val("bBiz"),scorp=val("sCorp"),am=val("amt");
   $("doc").innerHTML=`<div class="doc-wm">CANDELA KOREA</div>
 <div class="doc-title">부속 합의서</div>
 <div class="doc-meta">
@@ -265,7 +266,7 @@ ${tblH(aIt)}
 <div class="doc-closing">본 부속합의서에 명시된 해당 구성품 변경 외의 구매계약서 상의 다른 조건은 여전히 유효하며 양 당사자에게 구속력을 갖습니다. 각 당사자의 적법하게 수권 받은 대표는 본 부속 합의서 2부를 체결하여 각 당사자가 한 부씩 보관하며, 직인이 날인된 순간부터 해당 부속 합의서의 효력이 발휘됩니다.</div>
 <table class="sig-tbl">
   <tr><td colspan="2" class="hd">회사: ${esc(sn)}</td><td colspan="2" class="hd">구매자: ${esc(bn)}</td></tr>
-  <tr><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td style="width:230px">${esc(sa)}</td><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td>${esc(ba)}</td></tr>
+  <tr><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td style="width:230px">${esc(sa)}</td><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td>${esc(ba1)}${ba2?"<br>"+esc(ba2):""}</td></tr>
   <tr><td><span class="sig-lbl">대표자명</span></td><td style="text-align:center">${esc(sr)}&nbsp;&nbsp;(인)</td><td><span class="sig-lbl">성명/직책</span></td><td style="text-align:center">${br?esc(br)+"&nbsp;&nbsp;(인)":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인)"}</td></tr>
   <tr><td colspan="2" style="text-align:center"><span class="sig-lbl">사업자등록번호: </span>${esc(sbiz)}<br><span class="sig-lbl">법인등록번호: </span>${esc(scorp)}</td><td colspan="2" style="text-align:center"><span class="sig-lbl">사업자등록번호: </span>${esc(bbiz)}</td></tr>
 </table>`;
@@ -390,12 +391,11 @@ async function exportWord() {
     const buyerNameOnly = val("bName").replace("㈜","").trim();
     xml = replaceInXml(xml, "이노메드", buyerNameOnly, 1);
 
-    // 9. 구매자 주소
-    const newAddr = val("bAddr");
-    if (newAddr) {
-      xml = xml.replace("서울시 용산구 한강대로 257 ", newAddr + " ");
-      xml = xml.replace("2층,4층(갈월동,청룡빌딩) (04322)", "");
-    }
+    // 9. 구매자 주소 (두 줄)
+    const newAddr1 = val("bAddr1");
+    const newAddr2 = val("bAddr2");
+    if (newAddr1) xml = xml.replace("서울시 용산구 한강대로 257 ", newAddr1 + " ");
+    xml = xml.replace("2층,4층(갈월동,청룡빌딩) (04322)", newAddr2 || "");
 
     // 10. 구매자 사업자번호
     xml = replaceInXml(xml, "106-81-97189", val("bBiz") || "106-81-97189", 1);
@@ -412,7 +412,7 @@ async function exportWord() {
                'xml:space="preserve"></w:t>')
       .replace(
         'xml:space="preserve">              </w:t></w:r><w:r w:rsidRPr="008A09BA"><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr><w:t xml:space="preserve"> </w:t>',
-        'xml:space="preserve"></w:t></w:r><w:r w:rsidRPr="008A09BA"><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr><w:t xml:space="preserve">'
+        'xml:space="preserve"></w:t></w:r><w:r w:rsidRPr="008A09BA"><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr><w:t xml:space="preserve"></w:t>'
       );
 
     // 12. ZIP 업데이트 후 blob 생성
@@ -439,7 +439,7 @@ async function exportWord() {
 
 // ── 초기화 ────────────────────────────────────────────────────────
 (function(){
-  const d=BUYERS.inomed;set("bName",d.name);set("bAddr",d.addr);set("bRep",d.rep);set("bBiz",d.biz);
+  const d=BUYERS.inomed;set("bName",d.name);set("bAddr1",d.addr1||d.addr||"");set("bAddr2",d.addr2||"");set("bRep",d.rep);set("bBiz",d.biz);
   renderRows(bIt,"bRows",NUMS_B,NAMES_B);
   renderRows(aIt,"aRows",NUMS_A,NAMES_A);
   render();
