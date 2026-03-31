@@ -2,10 +2,13 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>오늘 뭐 먹지? 룰렛</title>
+    <title>켄델라 코리아와 함께하는 오늘 뭐 먹지? 룰렛</title>
     <style>
         body { font-family: sans-serif; text-align: center; background: #f4f7f6; padding-top: 50px; }
         .roulette-container { position: relative; width: 300px; height: 300px; margin: 0 auto; }
+        
+        /* 켄델라 코리아 로고 */
+        .header-logo { max-width: 200px; margin-bottom: 20px; }
         
         /* 룰렛 판 */
         #canvas { width: 100%; height: 100%; border-radius: 50%; border: 5px solid #333; transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); }
@@ -20,7 +23,7 @@
 </head>
 <body>
 
-    <h2>오늘 뭐 먹지? 🎰</h2>
+    <img src="https://img.sbs.co.kr/sbscnbc/upload/2018/10/01/10000612811.jpg" alt="Candela Korea Logo" class="header-logo"> <h2>오늘 뭐 먹지? 🎰</h2>
     <div class="roulette-container">
         <div class="arrow"></div>
         <canvas id="canvas" width="300" height="300"></canvas>
@@ -35,49 +38,14 @@
         const menu = ["한식", "중식", "일식", "양식", "분식", "치킨", "피자", "샐러드"];
         const colors = ["#ff7675", "#fdcb6e", "#55efc4", "#81ecec", "#74b9ff", "#a29bfe", "#ffeaa7", "#fab1a0"];
 
+        /* 로고 이미지 경로 설정 (실제 로고 이미지 파일이 있을 경우 주석 해제 후 경로 입력) */
+        // const logoImage = new Image();
+        // logoImage.src = 'path/to/your/candela-korea-logo.png'; // 로고 이미지 파일 경로
+
         // 룰렛 그리기
         function drawRoulette() {
             const arc = (2 * Math.PI) / menu.length;
             for (let i = 0; i < menu.length; i++) {
                 ctx.beginPath();
                 ctx.fillStyle = colors[i % colors.length];
-                ctx.moveTo(150, 150);
-                ctx.arc(150, 150, 150, arc * i, arc * (i + 1));
-                ctx.fill();
-                ctx.save();
-                
-                // 텍스트 추가
-                ctx.fillStyle = "#333";
-                ctx.translate(150, 150);
-                ctx.rotate(arc * i + arc / 2);
-                ctx.textAlign = "right";
-                ctx.font = "bold 16px sans-serif";
-                ctx.fillText(menu[i], 130, 10);
-                ctx.restore();
-            }
-        }
-
-        // 회전 로직
-        let currentRotation = 0;
-        function rotate() {
-            const resultDiv = document.getElementById("result");
-            resultDiv.innerText = "두구두구...";
-            
-            const randomDegree = Math.floor(Math.random() * 360) + 1440; // 최소 4바퀴 회전
-            currentRotation += randomDegree;
-            canvas.style.transform = `rotate(${currentRotation}deg)`;
-
-            // 결과 계산 (회전 애니메이션 종료 후)
-            setTimeout(() => {
-                const actualDegree = currentRotation % 360;
-                const arc = 360 / menu.length;
-                // 화살표가 위(270도 방향)에 있으므로 인덱스 조정 필요
-                const index = Math.floor(((360 - actualDegree + 270) % 360) / arc);
-                resultDiv.innerText = `오늘의 메뉴는? [${menu[index]}]!`;
-            }, 4000);
-        }
-
-        drawRoulette();
-    </script>
-</body>
-</html>
+                ctx.moveTo(150, 15
