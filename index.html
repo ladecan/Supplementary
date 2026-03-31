@@ -193,7 +193,7 @@ const NO2N={"7123-CE-0650":"GMPP DCD Small","7123-CE-0632":"GMPP DCD Medium","71
 const N2NO=Object.fromEntries(Object.entries(NO2N).map(([k,v])=>[v,k]));
 const BUYERS={
   inomed:{name:"㈜이노메드",addr1:"서울시 용산구 한강대로 257 ",addr2:"2층,4층(갈월동,청룡빌딩) (04322)",rep:"변승환",biz:"106-81-97189"},
-  sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111,",addr2:"부산지식산업센터 102 호(46508)",rep:"이호재 사장님",biz:""}
+  sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111,",addr2:"부산지식산업센터 102 호(46508)",rep:"이호재",biz:"551-88-01183"}
 };
 
 let bIt=[{no:"7123-CE-0650",name:"GMPP DCD Small",qty:1},{no:"7123-CE-0632",name:"GMPP DCD Medium",qty:1},{no:"7123-CE-0653",name:"GMPP ACC Large",qty:1}];
@@ -407,7 +407,7 @@ async function exportWord() {
     // run1(' ') → 이름으로, run2('   ') → 빈칸, run3('              ') → 빈칸, run4(' ') → 빈칸
     xml = xml
       .replace('xml:space="preserve"> </w:t></w:r><w:r w:rsidR="00E24BF4">', 
-               `xml:space="preserve">${repName}</w:t></w:r><w:r w:rsidR="00E24BF4">`)
+               `xml:space="preserve">         ${repName}</w:t></w:r><w:r w:rsidR="00E24BF4">`)
       .replace('xml:space="preserve">   </w:t>',
                'xml:space="preserve"></w:t>')
       .replace(
