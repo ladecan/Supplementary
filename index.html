@@ -32,4 +32,144 @@
         .input-name { flex: 3; }
         .input-weight { flex: 1; text-align: center; }
         .btn-remove { background: #ff7675; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-add { width: 100%; padding: 10px; background: #eee; border: 2px dashed #ccc; border-radius:
+        .btn-add { width: 100%; padding: 10px; background: #eee; border: 2px dashed #ccc; border-radius: 10px; cursor: pointer; margin-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <img src="https://img.sbs.co.kr/sbscnbc/upload/2018/10/01/10000612811.jpg" alt="Candela Korea Logo" class="header-logo">
+    <h2>LUNCH ROULETTE</h2>
+
+    <div class="roulette-outer">
+        <div class="arrow"></div>
+        <canvas id="canvas" width="400" height="400"></canvas>
+    </div>
+    
+    <button class="btn-spin" onclick="rotate()">SPIN!</button>
+    <div id="result"></div>
+
+    <div class="settings">
+        <h3 style="margin-top:0">메뉴 설정 (이름 / 수량)</h3>
+        <div id="menu-list">
+            </div>
+        <button class="btn-add" onclick="addMenuItem()">+ 메뉴 추가</button>
+        <p style="font-size: 12px; color: #888; margin-top: 15px;">* 수량이 높을수록 당첨 확률이 올라갑니다.</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        const resultDiv = document.getElementById("result");
+        
+        let menuData = [
+            { name: "한식", weight: 1 },
+            { name: "중식", weight: 1 },
+            { name: "일식", weight: 1 },
+            { name: "양식", weight: 1 },
+            { name: "분식", weight: 1 }
+        ];
+
+        const colors = ["#ff7675", "#fdcb6e", "#55efc4", "#81ecec", "#74b9ff", "#a29bfe", "#ffeaa7", "#fab1a0"];
+
+        // 설정 UI 업데이트
+        function updateUI() {
+            const list = document.getElementById("menu-list");
+            list.innerHTML = "";
+            menuData.forEach((item, i) => {
+                const div = document.createElement("div");
+                div.className = "menu-item";
+                div.innerHTML = `
+                    <input type="text" class="input-name" value="${item.name}" onchange="updateData(${i}, 'name', this.value)">
+                    <input type="number" class="input-weight" value="${item.weight}" min="1" onchange="updateData(${i}, 'weight', this.value)">
+                    <button class="btn-remove" onclick="removeMenuItem(${i})">✕</button>
+                `;
+                list.appendChild(div);
+            });
+            drawRoulette();
+        }
+
+        function updateData(index, key, value) {
+            menuData[index][key] = key === 'weight' ? parseInt(value) || 1 : value;
+            drawRoulette();
+        }
+
+        function addMenuItem() {
+            menuData.push({ name: "새 메뉴", weight: 1 });
+            updateUI();
+        }
+
+        function removeMenuItem(index) {
+            if(menuData.length <= 2) return alert("최소 2개 이상의 메뉴가 필요합니다.");
+            menuData.splice(index, 1);
+            updateUI();
+        }
+
+        // 룰렛 그리기 (가중치 반영)
+        function drawRoulette() {
+            const totalWeight = menuData.reduce((acc, cur) => acc + cur.weight, 0);
+            let currentAngle = 0;
+
+            ctx.clearRect(0, 0, 400, 400);
+
+            menuData.forEach((item, i) => {
+                const portion = (item.weight / totalWeight) * (2 * Math.PI);
+                
+                ctx.beginPath();
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.moveTo(200, 200);
+                ctx.arc(200, 200, 200, currentAngle, currentAngle + portion);
+                ctx.fill();
+                ctx.stroke();
+                ctx.strokeStyle = "#fff";
+
+                // 텍스트 그리기
+                ctx.save();
+                ctx.fillStyle = "#333";
+                ctx.translate(200, 200);
+                ctx.rotate(currentAngle + portion / 2);
+                ctx.textAlign = "right";
+                ctx.font = "bold 18px sans-serif";
+                ctx.fillText(item.name, 180, 10);
+                ctx.restore();
+
+                currentAngle += portion;
+            });
+        }
+
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        function rotate() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            resultDiv.innerText = "메뉴 선정 중...";
+            
+            const randomDegree = Math.floor(Math.random() * 360) + 1800; 
+            currentRotation += randomDegree;
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                const totalWeight = menuData.reduce((acc, cur) => acc + cur.weight, 0);
+                const actualDegree = (360 - (currentRotation % 360) + 270) % 360;
+                
+                let cumulativeAngle = 0;
+                let winner = "";
+
+                for (let item of menuData) {
+                    const portionDegree = (item.weight / totalWeight) * 360;
+                    if (actualDegree >= cumulativeAngle && actualDegree < cumulativeAngle + portionDegree) {
+                        winner = item.name;
+                        break;
+                    }
+                    cumulativeAngle += portionDegree;
+                }
+                resultDiv.innerText = `오늘의 추천: ${winner}!`;
+            }, 4000);
+        }
+
+        updateUI();
+    </script>
+</body>
+</html>
