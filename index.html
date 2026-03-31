@@ -7,32 +7,27 @@
         :root { --primary-color: #004a99; --accent-color: #e74c3c; }
         body { font-family: 'Pretendard', sans-serif; text-align: center; background: #f8f9fa; color: #333; padding: 40px 20px; }
         
-        /* 로고 및 헤더 */
         .header-logo { max-width: 180px; margin-bottom: 10px; }
-        h2 { margin-bottom: 30px; font-weight: 800; color: var(--primary-color); }
+        h2 { margin-bottom: 30px; font-weight: 800; color: var(--primary-color); letter-spacing: -1px; }
 
-        /* 룰렛 스타일 */
         .roulette-outer { position: relative; width: 350px; height: 350px; margin: 0 auto 40px; }
         #canvas { width: 100%; height: 100%; border-radius: 50%; border: 8px solid #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
                   transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1); background: white; }
         .arrow { position: absolute; top: -25px; left: 50%; transform: translateX(-50%); width: 0; height: 0; 
                   border-left: 20px solid transparent; border-right: 20px solid transparent; border-top: 35px solid var(--accent-color); z-index: 10; }
 
-        /* 버튼 */
-        .btn-spin { padding: 15px 50px; font-size: 20px; font-weight: bold; cursor: pointer; 
+        .btn-spin { padding: 15px 60px; font-size: 20px; font-weight: bold; cursor: pointer; 
                     background: var(--primary-color); color: white; border: none; border-radius: 50px; 
                     box-shadow: 0 4px 15px rgba(0,74,153,0.3); transition: 0.3s; }
         .btn-spin:hover { transform: scale(1.05); background: #003670; }
         #result { margin-top: 25px; font-size: 28px; font-weight: bold; color: var(--accent-color); min-height: 40px; }
 
-        /* 설정 영역 */
-        .settings { max-width: 500px; margin: 50px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-        .menu-item { display: flex; gap: 10px; margin-bottom: 10px; align-items: center; }
-        input { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; }
-        .input-name { flex: 3; }
-        .input-weight { flex: 1; text-align: center; }
-        .btn-remove { background: #ff7675; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
-        .btn-add { width: 100%; padding: 10px; background: #eee; border: 2px dashed #ccc; border-radius: 10px; cursor: pointer; margin-top: 10px; }
+        .settings { max-width: 400px; margin: 50px auto; background: white; padding: 25px; border-radius: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+        .menu-item { display: flex; gap: 10px; margin-bottom: 10px; }
+        input { flex: 1; padding: 10px 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .btn-remove { background: #ff7675; color: white; border: none; padding: 0 15px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-add { width: 100%; padding: 12px; background: #f0f2f5; border: 2px dashed #cbd5e0; border-radius: 12px; cursor: pointer; margin-top: 10px; font-weight: 600; color: #666; }
+        .btn-add:hover { background: #e2e8f0; }
     </style>
 </head>
 <body>
@@ -49,11 +44,9 @@
     <div id="result"></div>
 
     <div class="settings">
-        <h3 style="margin-top:0">메뉴 설정 (이름 / 수량)</h3>
-        <div id="menu-list">
-            </div>
+        <h3 style="margin-top:0; font-size: 18px; color: #555;">메뉴 편집</h3>
+        <div id="menu-list"></div>
         <button class="btn-add" onclick="addMenuItem()">+ 메뉴 추가</button>
-        <p style="font-size: 12px; color: #888; margin-top: 15px;">* 수량이 높을수록 당첨 확률이 올라갑니다.</p>
     </div>
 
     <script>
@@ -61,26 +54,18 @@
         const ctx = canvas.getContext("2d");
         const resultDiv = document.getElementById("result");
         
-        let menuData = [
-            { name: "한식", weight: 1 },
-            { name: "중식", weight: 1 },
-            { name: "일식", weight: 1 },
-            { name: "양식", weight: 1 },
-            { name: "분식", weight: 1 }
-        ];
-
+        // 초기 메뉴 설정
+        let menus = ["한식", "중식", "일식", "양식", "분식"];
         const colors = ["#ff7675", "#fdcb6e", "#55efc4", "#81ecec", "#74b9ff", "#a29bfe", "#ffeaa7", "#fab1a0"];
 
-        // 설정 UI 업데이트
         function updateUI() {
             const list = document.getElementById("menu-list");
             list.innerHTML = "";
-            menuData.forEach((item, i) => {
+            menus.forEach((menu, i) => {
                 const div = document.createElement("div");
                 div.className = "menu-item";
                 div.innerHTML = `
-                    <input type="text" class="input-name" value="${item.name}" onchange="updateData(${i}, 'name', this.value)">
-                    <input type="number" class="input-weight" value="${item.weight}" min="1" onchange="updateData(${i}, 'weight', this.value)">
+                    <input type="text" value="${menu}" onchange="updateMenu(${i}, this.value)">
                     <button class="btn-remove" onclick="removeMenuItem(${i})">✕</button>
                 `;
                 list.appendChild(div);
@@ -88,51 +73,44 @@
             drawRoulette();
         }
 
-        function updateData(index, key, value) {
-            menuData[index][key] = key === 'weight' ? parseInt(value) || 1 : value;
+        function updateMenu(index, value) {
+            menus[index] = value;
             drawRoulette();
         }
 
         function addMenuItem() {
-            menuData.push({ name: "새 메뉴", weight: 1 });
+            menus.push("새 메뉴");
             updateUI();
         }
 
         function removeMenuItem(index) {
-            if(menuData.length <= 2) return alert("최소 2개 이상의 메뉴가 필요합니다.");
-            menuData.splice(index, 1);
+            if(menus.length <= 2) return alert("최소 2개 이상의 메뉴가 필요합니다.");
+            menus.splice(index, 1);
             updateUI();
         }
 
-        // 룰렛 그리기 (가중치 반영)
         function drawRoulette() {
-            const totalWeight = menuData.reduce((acc, cur) => acc + cur.weight, 0);
-            let currentAngle = 0;
-
+            const arc = (2 * Math.PI) / menus.length;
             ctx.clearRect(0, 0, 400, 400);
 
-            menuData.forEach((item, i) => {
-                const portion = (item.weight / totalWeight) * (2 * Math.PI);
-                
+            menus.forEach((name, i) => {
                 ctx.beginPath();
                 ctx.fillStyle = colors[i % colors.length];
                 ctx.moveTo(200, 200);
-                ctx.arc(200, 200, 200, currentAngle, currentAngle + portion);
+                ctx.arc(200, 200, 200, arc * i, arc * (i + 1));
                 ctx.fill();
-                ctx.stroke();
                 ctx.strokeStyle = "#fff";
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-                // 텍스트 그리기
                 ctx.save();
                 ctx.fillStyle = "#333";
                 ctx.translate(200, 200);
-                ctx.rotate(currentAngle + portion / 2);
+                ctx.rotate(arc * i + arc / 2);
                 ctx.textAlign = "right";
                 ctx.font = "bold 18px sans-serif";
-                ctx.fillText(item.name, 180, 10);
+                ctx.fillText(name, 180, 10);
                 ctx.restore();
-
-                currentAngle += portion;
             });
         }
 
@@ -141,7 +119,6 @@
 
         function rotate() {
             if (isSpinning) return;
-            
             isSpinning = true;
             resultDiv.innerText = "메뉴 선정 중...";
             
@@ -151,21 +128,11 @@
 
             setTimeout(() => {
                 isSpinning = false;
-                const totalWeight = menuData.reduce((acc, cur) => acc + cur.weight, 0);
                 const actualDegree = (360 - (currentRotation % 360) + 270) % 360;
+                const arcDegree = 360 / menus.length;
+                const winnerIndex = Math.floor(actualDegree / arcDegree) % menus.length;
                 
-                let cumulativeAngle = 0;
-                let winner = "";
-
-                for (let item of menuData) {
-                    const portionDegree = (item.weight / totalWeight) * 360;
-                    if (actualDegree >= cumulativeAngle && actualDegree < cumulativeAngle + portionDegree) {
-                        winner = item.name;
-                        break;
-                    }
-                    cumulativeAngle += portionDegree;
-                }
-                resultDiv.innerText = `오늘의 추천: ${winner}!`;
+                resultDiv.innerText = `오늘의 추천: ${menus[winnerIndex]}!`;
             }, 4000);
         }
 
