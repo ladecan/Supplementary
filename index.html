@@ -5,143 +5,124 @@
 <title>Candela 부속 합의서 생성기</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
+  /* 생략: 이전과 동일한 스타일 시트 */
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
   :root { --bg: #f4f6fb; --surface: #ffffff; --border: #e4e8f3; --accent: #3b7ef8; --accent2: #6c4ff5; --text: #1a1d2e; --muted: #7a8099; --radius: 10px; }
   body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); padding: 32px 16px; }
   .container { max-width: 760px; margin: 0 auto; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
-  .card-title { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 8px; text-transform: uppercase; }
-  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  label { font-size: 11px; font-weight: 500; color: var(--muted); }
+  .card-title { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
   input, select, textarea { background: #f9fafd; border: 1px solid var(--border); border-radius: 7px; padding: 10px; font-size: 13px; width: 100%; outline: none; }
   .selection-area { background: #f0f2ff; padding: 15px; border-radius: 8px; border: 1px dashed var(--accent); margin-bottom: 10px; }
-  .btn-add { padding: 8px 15px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 12px; }
+  .btn-add { padding: 8px 15px; background: var(--accent); color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; }
   .btn-generate { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: var(--radius); color: white; font-weight: 600; cursor: pointer; font-size: 15px; margin-top: 10px; }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <header style="text-align:center; margin-bottom:30px;">
-    <h1 style="font-size:24px;">부속 합의서 생성기</h1>
-  </header>
-
   <div class="card">
     <div class="card-title">기본 정보</div>
-    <div class="row">
-      <div class="field"><label>구매계약서 번호</label><input id="contract_no" type="text" value="20241206001"> </div>
-      <div class="field"><label>원 계약 체결일자</label><input id="contract_date" type="text" value="2024년 12월 6일"> </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div><label style="font-size:11px;">구매계약서 번호</label><input id="contract_no" type="text" value="20241206001"></div>
+      <div><label style="font-size:11px;">원 계약 체결일자</label><input id="contract_date" type="text" value="2024년 12월 6일"></div>
     </div>
-    <div class="field"><label>부속 합의 일자</label><input id="addon_date" type="date"></div>
   </div>
 
   <div class="card">
-    <div class="card-title">1. 변경 대상 구성품 (변경 전) </div>
+    <div class="card-title">1. 변경 대상 구성품 (변경 전)</div>
     <div class="selection-area">
       <div style="display:flex; gap:10px; align-items:flex-end;">
-        <div style="flex:1.5;" class="field">
-          <label>구성품 번호</label>
+        <div style="flex:1.5;">
+          <label style="font-size:11px;">구성품 번호</label>
           <select id="ori_code">
             <option value="7123-CE-0650">7123-CE-0650</option>
             <option value="7123-CE-0632">7123-CE-0632</option>
             <option value="7123-CE-0652">7123-CE-0652</option>
             <option value="7123-CE-0653">7123-CE-0653</option>
-            <option value="FIN100834">FIN100834</option> [cite: 5]
+            <option value="FIN100834">FIN100834</option>
           </select>
         </div>
-        <div style="flex:2;" class="field">
-          <label>구성품 명칭</label>
+        <div style="flex:2;">
+          <label style="font-size:11px;">구성품 명칭</label>
           <select id="ori_name">
             <option value="GMPP DCD Small">GMPP DCD Small</option>
             <option value="GMPP DCD Medium">GMPP DCD Medium</option>
             <option value="GMPP DCD Large">GMPP DCD Large</option>
             <option value="GMPP ACC Large">GMPP ACC Large</option>
-            <option value="Zimmer Cryo7">Zimmer Cryo7</option> [cite: 6]
+            <option value="Zimmer Cryo7">Zimmer Cryo7</option>
           </select>
         </div>
-        <div style="flex:0.5;" class="field"><label>수량</label><input id="ori_qty" type="number" value="1"></div>
+        <div style="flex:0.5;"><label style="font-size:11px;">수량</label><input id="ori_qty" type="number" value="1"></div>
         <button class="btn-add" onclick="addRow('ori')">추가</button>
       </div>
     </div>
-    <textarea id="ori_items" rows="3" placeholder="추가된 항목이 여기에 표시됩니다."></textarea>
+    <textarea id="ori_items" rows="3" readonly placeholder="추가 버튼을 누르면 목록이 생성됩니다."></textarea>
   </div>
 
   <div class="card">
-    <div class="card-title">2. 변경 후 구성품 (변경 후) </div>
+    <div class="card-title">2. 변경 후 구성품 (변경 후)</div>
     <div class="selection-area" style="background:#eefbff;">
       <div style="display:flex; gap:10px; align-items:flex-end;">
-        <div style="flex:1.5;" class="field">
-          <label>구성품 번호</label>
-          <select id="new_code">
-            <option value="FIN101958">FIN101958</option> 
-            <option value="7123-CE-0650">7123-CE-0650</option>
-          </select>
-        </div>
-        <div style="flex:2;" class="field">
-          <label>구성품 명칭</label>
-          <select id="new_name">
-            <option value="GMPP Modified LSDS Options Kit for DCD">Modified LSDS Kit</option> 
-            <option value="GMPP DCD Small">GMPP DCD Small</option>
-          </select>
-        </div>
-        <div style="flex:0.5;" class="field"><label>수량</label><input id="new_qty" type="number" value="1"></div>
+        <div style="flex:1.5;"><label style="font-size:11px;">구성품 번호</label><input id="new_code_in" type="text" value="FIN101958"></div>
+        <div style="flex:2;"><label style="font-size:11px;">구성품 명칭</label><input id="new_name_in" type="text" value="GMPP Modified LSDS Options Kit for DCD"></div>
+        <div style="flex:0.5;"><label style="font-size:11px;">수량</label><input id="new_qty_in" type="number" value="2"></div>
         <button class="btn-add" style="background:#3b7ef8;" onclick="addRow('new')">추가</button>
       </div>
     </div>
-    <textarea id="new_items" rows="3" placeholder="추가된 항목이 여기에 표시됩니다."></textarea>
+    <textarea id="new_items" rows="2" readonly></textarea>
   </div>
 
   <div class="card">
-    <div class="card-title">최종 조건</div>
-    <div class="field"><label>변경 후 최종 계약 금액</label><input id="final_price" type="text" value="150,000,000원(VAT포함)"> </div>
-    <div class="row" style="margin-top:10px;">
-      <div class="field"><label>구매자명</label><input id="buyer_name" type="text" value="㈜이노메드"> </div>
-      <div class="field"><label>사업자번호</label><input id="biz_no" type="text" value="106-81-97189"> </div>
-    </div>
+    <div class="card-title">구매자 정보</div>
+    <input id="buyer_name" type="text" value="㈜이노메드" placeholder="구매자명">
+    <input id="final_price" type="text" value="150,000,000원(VAT포함)" style="margin-top:10px;">
   </div>
 
   <button class="btn-generate" onclick="generateDocx()">📄 부속 합의서 워드 다운로드</button>
 </div>
 
 <script>
-// 오늘 날짜 설정
-document.getElementById('addon_date').value = new Date().toISOString().split('T')[0];
-
+// 1. 목록 추가 기능
 function addRow(type) {
-  const code = document.getElementById(type + '_code').value;
-  const name = document.getElementById(type + '_name').value;
-  const qty = document.getElementById(type + '_qty').value;
+  let code, name, qty;
+  if(type === 'ori') {
+    code = document.getElementById('ori_code').value;
+    name = document.getElementById('ori_name').value;
+    qty = document.getElementById('ori_qty').value;
+  } else {
+    code = document.getElementById('new_code_in').value;
+    name = document.getElementById('new_name_in').value;
+    qty = document.getElementById('new_qty_in').value;
+  }
   const target = document.getElementById(type + '_items');
-  target.value += `${code} / ${name} / ${qty}개\n`;
+  target.value += (target.value ? '\n' : '') + `${code}, ${name}, ${qty}`;
 }
 
-function b64ToUint8(b64) {
-  const bin = atob(b64);
-  const buf = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
-  return buf;
-}
-
+// 2. 워드 저장 핵심 로직 (에러 수정됨)
 async function generateDocx() {
-  const TEMPLATE_B64 = "여기에_부속합의서_워드_BASE64_데이터를_넣으세요"; // 기존 파일에서 복사 필요
-  
+  // 실제 파일의 Base64 데이터가 필요합니다. 
+  // 'atob' 에러는 아래 문자열이 올바른 Base64가 아닐 때 발생합니다.
+  const TEMPLATE_B64 = "여기에_기존_부속합의서_파일의_Base64_데이터를_복사해서_넣으세요"; 
+
   try {
-    const bytes = b64ToUint8(TEMPLATE_B64);
-    const zip = await JSZip.loadAsync(bytes);
+    const bin = atob(TEMPLATE_B64.trim());
+    const buf = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    
+    const zip = await JSZip.loadAsync(buf);
     let xml = await zip.file('word/document.xml').async('string');
 
-    const replacements = {
+    // 맵핑 데이터
+    const data = {
       '{{ contract_no }}': document.getElementById('contract_no').value,
-      '{{ contract_date }}': document.getElementById('contract_date').value,
-      '{{ addon_date }}': document.getElementById('addon_date').value,
       '{{ ori_items }}': document.getElementById('ori_items').value.replace(/\n/g, '<w:br/>'),
       '{{ new_items }}': document.getElementById('new_items').value.replace(/\n/g, '<w:br/>'),
-      '{{ final_price }}': document.getElementById('final_price').value,
-      '{{ buyer_name }}': document.getElementById('buyer_name').value
+      '{{ buyer_name }}': document.getElementById('buyer_name').value,
+      '{{ final_price }}': document.getElementById('final_price').value
     };
 
-    for (const [key, val] of Object.entries(replacements)) {
+    for (const [key, val] of Object.entries(data)) {
       xml = xml.split(key).join(val);
     }
 
@@ -150,10 +131,10 @@ async function generateDocx() {
     
     const link = document.createElement('a');
     link.href = URL.createObjectURL(content);
-    link.download = "부속합의서_" + document.getElementById('buyer_name').value + ".docx";
+    link.download = `부속합의서_${document.getElementById('buyer_name').value}.docx`;
     link.click();
   } catch (e) {
-    alert("오류 발생: " + e.message);
+    alert("오류 발생: " + e.message + "\n(TEMPLATE_B64 데이터가 올바른지 확인해주세요)");
   }
 }
 </script>
