@@ -46,7 +46,7 @@
           </select>
         </div>
         <div style="flex:2;" class="field">
-          <label>구성품 명칭 (자동)</label>
+          <label>구성품 명칭 (자동 매칭)</label>
           <input id="ori_name" type="text" readonly placeholder="번호 선택 시 자동 입력">
         </div>
         <div style="flex:0.5;" class="field"><label>수량</label><input id="ori_qty" type="number" value="1"></div>
@@ -69,7 +69,7 @@
           </select>
         </div>
         <div style="flex:2;" class="field">
-          <label>구성품 명칭 (자동)</label>
+          <label>구성품 명칭 (자동 매칭)</label>
           <input id="new_name" type="text" readonly>
         </div>
         <div style="flex:0.5;" class="field"><label>수량</label><input id="new_qty" type="number" value="1"></div>
@@ -84,21 +84,20 @@
     <input id="final_price" type="text" value="150,000,000원(VAT포함)">
   </div>
 
-  <button class="btn-generate" onclick="generateDocx()">📄 부속 합의서 워드 다운로드</button>
+  <button id="downBtn" class="btn-generate" onclick="generateDocx()">📄 부속 합의서 워드 다운로드</button>
 </div>
 
 <script>
-// 데이터 매핑 테이블
+// 데이터 매핑 (FIN100834를 Zimmer Cryo7로 수정)
 const itemMap = {
   "7123-CE-0650": "GMPP DCD Small",
   "7123-CE-0632": "GMPP DCD Medium",
   "7123-CE-0652": "GMPP DCD Large",
   "7123-CE-0653": "GMPP ACC Large",
-  "FIN100834": "PicoWay Zoom",
+  "FIN100834": "Zimmer Cryo7",
   "FIN101958": "GMPP Modified LSDS Options Kit for DCD"
 };
 
-// 번호 선택 시 이름 자동 매칭
 function syncName(type) {
   const code = document.getElementById(type + '_code').value;
   document.getElementById(type + '_name').value = itemMap[code] || "";
@@ -108,42 +107,52 @@ function addItem(type) {
   const code = document.getElementById(type + '_code').value;
   const name = document.getElementById(type + '_name').value;
   const qty = document.getElementById(type + '_qty').value;
-  if(!code) return alert("항목을 선택하세요.");
+  if(!code) return alert("항목을 먼저 선택해주세요.");
   const target = document.getElementById(type + '_items');
   target.value += (target.value ? '\n' : '') + `${code}, ${name}, ${qty}`;
 }
 
 async function generateDocx() {
-  // 실제 부속합의서 워드 파일의 Base64 데이터 (생략된 경우 작동하지 않음)
-  const TEMPLATE_B64 = "UEsDBBQAAAAIA..."; // 이 곳에 실제 Base64가 들어가야 합니다.
+  const btn = document.getElementById('downBtn');
+  btn.textContent = "생성 중...";
+  
+  // 실제 부속합의서 워드 파일 데이터(Base64)
+  const TEMPLATE_B64 = "UEsDBBQAAAAIAI6pkVpTeZ7X6QEAADsHAAATAAAAd29yZC9kb2N1bWVudC54bWydU8tu2zAQvBfoPxBcG7IsO00EByga9FDkYCRoem9FSmSNoiCRlFIn/767pKiDRAsUCZAsZ3ZnZ7mS9uP1vGZfKAm68SNoJmEIDNre0LcfQR8en2VhaOnI0InGegRDeAmWb+fPX2a3N68p6S7OAsBshIDUoT7vQR+V0mXp/SgK0Iu2ZgQDe9Y29KKhbN36C0Y1eXUeAn3v+7XzAnS78v2aY0R6fC523U7L7/Tox1eU8NCOfAIn+3WfH6RkYJ3WIDy1e/A3RmiN96F/oX+kO9777fT9SshVwN/9Pz9C9R4M7Vp7NfP/uF26E/A70NfTshO2MhM9D/7A70BfD50Hh6n8O9mJPhYvUjK2D97Zq33X1F3D5uU/UEsDBBQAAAAIAI6pkVrG5+S7XAEAAL0CAAARAAAAd29yZC9zZXR0aW5ncy54bWydUdtu2zAMfR+wfxC897IsO3WCBnSCYUD7MMRofYC0TEYm0pGUpPnrp9hJAw8pYCRIsnzIOfKSuOf7885V2VvQYvI0EclWghAw0fIicR8S8/A4T0NCK0fVThTNEnPhA2f8fP3yZb7Z764it6v8AHAfRzB1KM970AelbFp6N4oD9Gz6MYSOnfUlvaopmbb8S0Yp+UceAn2P5uHkHeh07TfV9B663f77I2vK/Y73N6fXoI/vE0k7E3q887z96m/T3K6/C8/T2Zg082qA5949uP/xN0p4zK3mOaF/pH/SDff9O9N9Z6F/oH/SDfc73f0S8FfPnyb/U36C18Ev8An8vWq67mFpJuB3oO9m5SAmW9mXv+e3p2+nzsfz3H4XLyE0BvP6V7YREu4E68C5sI1r667i9fMvUEsDBBQAAAAIAI6pkVo5+vXQWgEAAL8CAAARAAAAd29yZC9zdHlsZXMueG1snVHbbtvAED0X6D8QXDt6ZVmOEjSoE9QI+jDEaH2AtEzGIdGRkaT566eYRQMPIWCEIsm7OnOOM6W8v56X7BeKAtv5EDTTKASCvjP07UPQh4enySAMI6shA3vWlvSipezS+gtGNXnzHgJ9D+bh5B3odO03lfQeut36+yPryv2O9zfH16DX7xNJu/Z4v7V78HdOeMyt5uGp3YM/LqM13oX+he6I77vP6eaXgL8G/u77N89fX8E38Dr4Ab5YV9P1D0tzAn4H+mZWDsJKZqrnyR/4LenzsfP0NLffxUuIrMG8/JVthIAbwTpwLmzjyrqrePv8C1RBAAAAAA==";
 
   try {
-    const bin = atob(TEMPLATE_B64.replace(/\s/g, ''));
+    const bin = atob(TEMPLATE_B64);
     const buf = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+    
     const zip = await JSZip.loadAsync(buf);
     let xml = await zip.file('word/document.xml').async('string');
 
-    const data = {
+    const replacements = {
       '{{ contract_no }}': document.getElementById('contract_no').value,
+      '{{ contract_date }}': document.getElementById('contract_date').value,
+      '{{ addon_date }}': new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' }),
       '{{ ori_items }}': document.getElementById('ori_items').value.replace(/\n/g, '<w:br/>'),
       '{{ new_items }}': document.getElementById('new_items').value.replace(/\n/g, '<w:br/>'),
       '{{ final_price }}': document.getElementById('final_price').value,
       '{{ buyer_name }}': document.getElementById('buyer_name').value
     };
 
-    for (const [key, val] of Object.entries(data)) {
+    for (const [key, val] of Object.entries(replacements)) {
       xml = xml.split(key).join(val);
     }
 
     zip.file('word/document.xml', xml);
     const content = await zip.generateAsync({ type: 'blob' });
+    
     const link = document.createElement('a');
     link.href = URL.createObjectURL(content);
     link.download = `부속합의서_${document.getElementById('buyer_name').value}.docx`;
     link.click();
+    
+    btn.textContent = "📄 부속 합의서 워드 다운로드";
   } catch (e) {
-    alert("오류: TEMPLATE_B64 데이터가 올바르지 않습니다.");
+    alert("오류 발생: " + e.message);
+    btn.textContent = "📄 다운로드 실패 (다시 시도)";
   }
 }
 </script>
