@@ -5,83 +5,138 @@
 <title>Candela 부속 합의서 생성기</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
-  /* 기존 스타일 유지 */
+  /* 기존 계약서 생성기와 동일한 프리미엄 스타일 유지 */
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
-  :root { --bg: #f4f6fb; --surface: #ffffff; --border: #e4e8f3; --accent: #6c4ff5; --text: #1a1d2e; --radius: 10px; }
-  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); padding: 32px 16px; }
+  :root { --bg: #f4f6fb; --surface: #ffffff; --border: #e4e8f3; --accent: #6c4ff5; --text: #1a1d2e; --muted: #7a8099; --radius: 10px; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); padding: 32px 16px; }
   .container { max-width: 760px; margin: 0 auto; }
   .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 16px; }
+  .card-title { font-size: 12px; font-weight: 600; color: var(--accent); margin-bottom: 18px; border-bottom: 1px solid var(--border); padding-bottom: 8px; text-transform: uppercase; }
   .field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-  label { font-size: 11px; font-weight: 600; color: #7a8099; }
-  input, select, textarea { border: 1px solid var(--border); border-radius: 7px; padding: 10px; font-size: 13px; width: 100%; }
-  .btn-add { background: var(--accent); color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-size: 12px; margin-top: 5px; }
-  .btn-generate { width: 100%; padding: 16px; background: linear-gradient(135deg, #3b7ef8, #6c4ff5); border: none; border-radius: var(--radius); color: white; font-weight: 700; cursor: pointer; }
+  label { font-size: 11px; font-weight: 500; color: var(--muted); }
+  input, select, textarea { background: #f9fafd; border: 1px solid var(--border); border-radius: 7px; padding: 10px; font-size: 13px; width: 100%; outline: none; }
+  
+  /* 구성품 선택 도구 스타일 */
+  .selector-box { background: #f0f2ff; padding: 15px; border-radius: 8px; border: 1px dashed var(--accent); margin-bottom: 20px; }
+  .btn-group { display: flex; gap: 8px; margin-top: 10px; }
+  .btn-add { flex: 1; padding: 10px; border: none; border-radius: 6px; color: white; cursor: pointer; font-size: 12px; font-weight: 600; }
+  .btn-generate { width: 100%; padding: 16px; background: linear-gradient(135deg, #3b7ef8, #6c4ff5); border: none; border-radius: var(--radius); color: white; font-weight: 600; cursor: pointer; font-size: 15px; }
 </style>
 </head>
 <body>
 
 <div class="container">
+  <header style="text-align:center; margin-bottom:30px;">
+    <h1 style="font-size:24px;">부속 합의서 생성기</h1>
+    <p style="color:var(--muted); font-size:13px;">구매계약 구성품 변경 내용을 입력하세요</p>
+  </header>
+
   <div class="card">
-    <h2 style="font-size:18px; margin-bottom:20px;">부속 합의서 정보</h2>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-      <div class="field"><label>계약서 번호</label><input id="contract_no" type="text" value="20241206001"></div>
-      <div class="field"><label>원 계약 체결일</label><input id="contract_date" type="text" value="2024년 12월 6일"></div>
+    <div class="card-title">기본 정보</div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+      <div class="field">
+        <label>구매계약서 번호</label>
+        <input id="contract_no" type="text" value="20241206001">
+      </div>
+      <div class="field">
+        <label>원 계약 체결일자</label>
+        <input id="contract_date" type="text" value="2024년 12월 6일">
+      </div>
+    </div>
+    <div class="field">
+      <label>부속 합의 일자</label>
+      <input id="addon_date" type="date">
     </div>
   </div>
 
   <div class="card">
-    <div style="color:var(--accent); font-size:12px; font-weight:700; margin-bottom:10px;">구성품 빠른 선택</div>
-    <div style="display:flex; gap:10px; align-items:flex-end; background:#f8f9ff; padding:15px; border-radius:8px;">
-      <div style="flex:2;" class="field">
-        <label>항목 선택</label>
-        <select id="item_select">
-          <option value="7123-CE-0650,GMPP DCD Small">7123-CE-0650 (GMPP DCD Small)</option>
-          <option value="7123-CE-0632,GMPP DCD Medium">7123-CE-0632 (GMPP DCD Medium)</option>
-          <option value="7123-CE-0652,GMPP DCD Large">7123-CE-0652 (GMPP DCD Large)</option>
-          <option value="7123-CE-0653,GMPP ACC Large">7123-CE-0653 (GMPP ACC Large)</option>
-          <option value="FIN100834,PicoWay Zoom">FIN100834 (PicoWay Zoom)</option>
-          <option value="FIN101958,GMPP Modified LSDS">FIN101958 (Modified LSDS)</option>
-        </select>
+    <div class="card-title">구성품 선택 (이미지 기반 목록)</div>
+    <div class="selector-box">
+      <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px;">
+        <div class="field">
+          <label>품목 선택</label>
+          <select id="item_dropdown">
+            <option value="7123-CE-0650,GMPP DCD Small">7123-CE-0650 (GMPP DCD Small)</option>
+            <option value="7123-CE-0632,GMPP DCD Medium">7123-CE-0632 (GMPP DCD Medium)</option>
+            <option value="7123-CE-0652,GMPP DCD Large">7123-CE-0652 (GMPP DCD Large)</option>
+            <option value="7123-CE-0653,GMPP ACC Large">7123-CE-0653 (GMPP ACC Large)</option>
+            <option value="FIN100834,PicoWay Zoom">FIN100834 (PicoWay Zoom)</option>
+            <option value="FIN101958,GMPP Modified LSDS Options Kit for DCD">FIN101958 (Modified LSDS Kit)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>수량</label>
+          <input id="item_qty" type="number" value="1">
+        </div>
       </div>
-      <div style="flex:0.5;" class="field">
-        <label>수량</label>
-        <input id="item_qty" type="number" value="1">
-      </div>
-      <div style="display:flex; gap:5px; margin-bottom:14px;">
-        <button class="btn-add" onclick="addItem('ori')">기존에 추가</button>
-        <button class="btn-add" style="background:#3b7ef8;" onclick="addItem('new')">신규에 추가</button>
+      <div class="btn-group">
+        <button class="btn-add" style="background:#7a8099;" onclick="addItem('ori')">기존 구성품(상단 표)에 추가</button>
+        <button class="btn-add" style="background:var(--accent);" onclick="addItem('new')">변경 후 구성품(하단 표)에 추가</button>
       </div>
     </div>
 
-    <div style="margin-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-      <div class="field"><label>변경 전 구성품 (목록)</label><textarea id="ori_items" rows="5"></textarea></div>
-      <div class="field"><label>변경 후 구성품 (목록)</label><textarea id="new_items" rows="5"></textarea></div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+      <div class="field">
+        <label>변경 대상 (기존) 리스트</label>
+        <textarea id="ori_items" rows="5" placeholder="구성품번호, 품명, 수량"></textarea>
+      </div>
+      <div class="field">
+        <label>변경 후 (신규) 리스트</label>
+        <textarea id="new_items" rows="5" placeholder="구성품번호, 품명, 수량"></textarea>
+      </div>
     </div>
   </div>
 
   <div class="card">
-    <div class="field"><label>최종 계약 금액</label><input id="final_price" type="text" value="150,000,000원(VAT포함)"></div>
+    <div class="card-title">최종 조건</div>
+    <div class="field">
+      <label>변경 후 최종 계약 금액</label>
+      <input id="final_price" type="text" value="150,000,000원(VAT포함)">
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+      <div class="field"><label>구매자명</label><input id="buyer_name" type="text" value="㈜이노메드"></div>
+      <div class="field"><label>구매자 주소</label><input id="buyer_addr" type="text"></div>
+    </div>
   </div>
 
-  <button class="btn-generate" onclick="generateAddon()">📄 부속 합의서 다운로드</button>
+  <button class="btn-generate" onclick="generateAddonDocx()">📄 부속 합의서 Word 다운로드</button>
 </div>
 
 <script>
-// 항목 추가 로직
-function addItem(target) {
-  const sel = document.getElementById('item_select').value;
+// 오늘 날짜 자동 설정
+document.getElementById('addon_date').value = new Date().toISOString().split('T')[0];
+
+function addItem(type) {
+  const dropdown = document.getElementById('item_dropdown').value;
   const qty = document.getElementById('item_qty').value;
-  const [code, name] = sel.split(',');
-  const textArea = document.getElementById(target + '_items');
-  textArea.value += `${code}, ${name}, ${qty}\n`;
+  const [code, name] = dropdown.split(',');
+  const target = document.getElementById(type + '_items');
+  target.value += `${code}, ${name}, ${qty}\n`;
 }
 
-async function generateAddon() {
-  // 워드 템플릿의 Base64를 입력하세요
+async function generateAddonDocx() {
+  // 여기에 부속 합의서용 워드 템플릿 Base64를 넣으세요.
   const TEMPLATE_B64 = "여기에_부속합의서_워드_BASE64_입력";
   
-  // 파일 생성 로직 (기존 소스코드의 generateDocx와 동일하게 연결)
-  alert('준비된 워드 템플릿과 연동하면 파일이 생성됩니다.');
+  const fields = {
+    contract_no: document.getElementById('contract_no').value,
+    contract_date: document.getElementById('contract_date').value,
+    addon_date: formatDate(document.getElementById('addon_date').value),
+    ori_items: document.getElementById('ori_items').value,
+    new_items: document.getElementById('new_items').value,
+    final_price: document.getElementById('final_price').value,
+    buyer_name: document.getElementById('buyer_name').value,
+    buyer_addr: document.getElementById('buyer_addr').value
+  };
+
+  // 기존 JSZip 치환 로직 실행 (생략)
+  alert('준비된 워드 템플릿과 연동하면 이미지와 동일한 표 형식으로 생성됩니다.');
+}
+
+function formatDate(iso) {
+  if(!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
 }
 </script>
 </body>
