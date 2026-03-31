@@ -2,60 +2,72 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>부속 합의서 작성 시스템</title>
+    <title>부속 합의서 자동 생성기</title>
     <script src="https://unpkg.com/docx@8.2.2/build/index.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: 'Malgun Gothic', sans-serif; padding: 20px; line-height: 1.6; background: #f4f4f4; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-        h2 { text-align: center; color: #333; }
-        .section { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
-        label { display: inline-block; width: 150px; font-weight: bold; }
-        input { padding: 8px; width: 250px; margin-bottom: 10px; border: 1px solid #ccc; }
-        button { display: block; width: 100%; padding: 15px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
-        button:hover { background: #0056b3; }
+        body { font-family: 'Malgun Gothic', sans-serif; padding: 40px; background: #eee; }
+        .form-container { max-width: 700px; margin: auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 5px; font-size: 18px; cursor: pointer; margin-top: 20px; }
+        button:hover { background: #218838; }
+        .info-text { font-size: 12px; color: #888; text-align: center; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>부속 합의서 작성</h2>
+<div class="form-container">
+    <h2 style="text-align: center;">계약서 정보 입력</h2>
     
-    <div class="section">
-        <h3>1. 기본 정보</h3>
-        <label>계약서 번호:</label> <input type="text" id="contractNo" value="20241206001"><br>
-        <label>계약 체결일:</label> <input type="text" id="contractDate" value="2024년 12월 6일"><br>
-        <label>부속 합의일:</label> <input type="text" id="agreementDate" value="2026년 3월 25일">
+    <div class="input-group">
+        <label>구매계약서 번호</label>
+        <input type="text" id="contractNo" value="20241206001">
+    </div>
+    <div class="input-group">
+        <label>구매계약서 체결일자</label>
+        <input type="text" id="contractDate" value="2024년 12월 6일">
+    </div>
+    <div class="input-group">
+        <label>부속 합의 일자</label>
+        <input type="text" id="agreementDate" value="2026년 3월 25일">
+    </div>
+    <div class="input-group">
+        <label>변경 후 최종 계약 금액</label>
+        <input type="text" id="totalPrice" value="150,000,000원(VAT포함)">
     </div>
 
-    <div class="section">
-        <h3>2. 금액 정보</h3>
-        <label>최종 계약 금액:</label> <input type="text" id="totalAmount" value="150,000,000원(VAT포함)">
-    </div>
-
-    <button onclick="generateDoc()">워드 파일(.docx) 다운로드</button>
+    <button id="downloadBtn">워드 파일(.docx) 다운로드</button>
+    <p class="info-text">버튼 클릭 후 1~2초 정도 기다려 주세요.</p>
 </div>
 
 <script>
-    async function generateDoc() {
-        const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, Header, Footer } = docx;
+    document.getElementById('downloadBtn').addEventListener('click', async function() {
+        const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType, AlignmentType, BorderStyle } = window.docx;
+
+        // 문서 데이터 가져오기
+        const contractNo = document.getElementById('contractNo').value;
+        const contractDate = document.getElementById('contractDate').value;
+        const agreementDate = document.getElementById('agreementDate').value;
+        const totalPrice = document.getElementById('totalPrice').value;
 
         const doc = new Document({
             sections: [{
+                properties: {},
                 children: [
                     new Paragraph({
                         alignment: AlignmentType.CENTER,
-                        children: [new TextRun({ text: "부속 합의서", bold: true, size: 32 })]
+                        children: [new TextRun({ text: "부속 합의서", bold: true, size: 36 })]
                     }),
                     new Paragraph({ text: "" }),
-                    new Paragraph({ children: [new TextRun({ text: `구매계약서 번호 : ${document.getElementById('contractNo').value}`, bold: true })] }),
-                    new Paragraph({ children: [new TextRun({ text: `구매계약서 체결일자 : ${document.getElementById('contractDate').value}`, bold: true })] }),
-                    new Paragraph({ children: [new TextRun({ text: `부속 합의 일자 : ${document.getElementById('agreementDate').value}`, bold: true })] }),
+                    new Paragraph({ children: [new TextRun({ text: `구매계약서 번호 : ${contractNo}`, bold: true })] }),
+                    new Paragraph({ children: [new TextRun({ text: `구매계약서 체결일자 : ${contractDate}`, bold: true })] }),
+                    new Paragraph({ children: [new TextRun({ text: `부속 합의 일자 : ${agreementDate}`, bold: true })] }),
                     new Paragraph({ text: "" }),
                     new Paragraph({ text: "위 합의된 구매계약서의 구성품 중 일부가 아래와 같이 변경되어 이에 대하여 다음과 같이 합의합니다." }),
                     new Paragraph({ text: "" }),
                     
-                    // 변경 대상 구성품 테이블
                     new Paragraph({ children: [new TextRun({ text: "[변경 대상 구성품]", bold: true })] }),
                     new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
@@ -70,11 +82,11 @@
                                 new TableCell({ children: [new Paragraph("GMPP DCD Small")] }),
                                 new TableCell({ children: [new Paragraph("1")] })
                             ]})
+                            // ... 기타 품목 추가 가능 [cite: 7]
                         ]
                     }),
                     new Paragraph({ text: "" }),
 
-                    // 변경 후 구성품 테이블
                     new Paragraph({ children: [new TextRun({ text: "[변경 후 구성품]", bold: true })] }),
                     new Table({
                         width: { size: 100, type: WidthType.PERCENTAGE },
@@ -92,17 +104,31 @@
                         ]
                     }),
                     new Paragraph({ text: "" }),
-                    new Paragraph({ children: [new TextRun({ text: `변경 후 최종 계약 금액 : ${document.getElementById('totalAmount').value}`, bold: true })] }),
+                    new Paragraph({ children: [new TextRun({ text: `변경 후 최종 계약 금액 : ${totalPrice}`, bold: true })] }),
                     new Paragraph({ text: "" }),
-                    new Paragraph({ text: "본 부속합의서에 명시된 해당 구성품 변경 외의 구매계약서 상의 다른 조건은 여전히 유효하며 양 당사자에게 구속력을 갖습니다." }),
+                    new Paragraph({ text: "본 부속합의서에 명시된 해당 구성품 변경 외의 구매계약서 상의 다른 조건은 여전히 유효하며 양 당사자에게 구속력을 갖습니다. [cite: 11]" }),
+                    new Paragraph({ text: "" }),
+
+                    // 서명란 테이블 
+                    new Table({
+                        width: { size: 100, type: WidthType.PERCENTAGE },
+                        rows: [
+                            new TableRow({
+                                children: [
+                                    new TableCell({ children: [new Paragraph({ text: "시너론켄델라코리아 유한회사", bold: true }), new Paragraph("주소: 서울시 서초구 강남대로 327"), new Paragraph("대표자명: 유지쿠리키 (인)")] }),
+                                    new TableCell({ children: [new Paragraph({ text: "㈜이노메드", bold: true }), new Paragraph("주소: 서울시 용산구 한강대로 257"), new Paragraph("성명/직책:                 (인)")] })
+                                ]
+                            })
+                        ]
+                    })
                 ]
             }]
         });
 
         Packer.toBlob(doc).then(blob => {
-            saveAs(blob, "부속합의서_수정본.docx");
+            saveAs(blob, "부속합의서_" + agreementDate + ".docx");
         });
-    }
+    });
 </script>
 
 </body>
