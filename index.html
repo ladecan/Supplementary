@@ -4,709 +4,583 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>부속합의서 생성기 | Candela Korea</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<!-- docx 9.5 UMD build -->
+<script src="https://cdn.jsdelivr.net/npm/docx@9.5.0/build/index.umd.js"></script>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
-
-:root {
-  --navy: #1e3a5f;
-  --navy-dark: #142844;
-  --navy-light: #e8edf5;
-  --navy-xlight: #f2f5fa;
-  --gold: #b8966e;
-  --surface: #ffffff;
-  --bg: #f0eeeb;
-  --border: #dbd6cf;
-  --border-light: #ece9e4;
-  --text: #1c1a18;
-  --text-mid: #4a4640;
-  --text-muted: #8a8480;
-  --red: #8b2030;
-  --red-light: #faeaec;
-  --green: #2d5f3f;
-  --green-light: #e6f2ec;
-  --shadow-lg: 0 12px 48px rgba(0,0,0,0.14);
-  --r: 6px;
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
+:root{
+  --navy:#1e3a5f; --navy-dk:#142844; --navy-lt:#e8edf5; --navy-xl:#f2f5fa;
+  --gold:#b8966e; --gold-dk:#9a7a58;
+  --surf:#fff; --bg:#f0eeeb; --bdr:#dbd6cf; --bdr-lt:#ece9e4;
+  --tx:#1c1a18; --tx2:#4a4640; --tx3:#8a8480;
+  --red:#8b2030; --red-lt:#faeaec;
+  --grn:#2d5f3f; --grn-lt:#e6f2ec;
+  --sh:0 4px 20px rgba(0,0,0,.09); --shl:0 12px 48px rgba(0,0,0,.14);
 }
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
 
 /* ── HEADER ── */
-header {
-  background: var(--navy); color: #fff;
-  padding: 0 28px; height: 52px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-shrink: 0; box-shadow: 0 2px 12px rgba(0,0,0,0.2); z-index: 20;
-}
-.hd-left { display: flex; align-items: center; gap: 12px; }
-.hd-brand { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 600; letter-spacing: 0.03em; }
-.hd-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); opacity: 0.7; }
-.hd-sub { font-size: 11px; opacity: 0.6; font-weight: 300; letter-spacing: 0.06em; }
-.btn-word {
-  display: flex; align-items: center; gap: 7px;
-  padding: 7px 18px; background: var(--gold); color: #fff;
-  border: none; border-radius: 5px; font-family: 'Noto Sans KR', sans-serif;
-  font-size: 12px; font-weight: 600; cursor: pointer; letter-spacing: 0.03em;
-  transition: all 0.2s; box-shadow: 0 2px 8px rgba(184,150,110,0.35);
-}
-.btn-word:hover { background: #a07d58; transform: translateY(-1px); }
-.btn-word:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 2px 12px rgba(0,0,0,.2);z-index:20}
+.hd-l{display:flex;align-items:center;gap:12px}
+.hd-brand{font-family:'Noto Serif KR',serif;font-size:15px;font-weight:600;letter-spacing:.03em}
+.hd-dot{width:4px;height:4px;border-radius:50%;background:var(--gold);opacity:.7}
+.hd-sub{font-size:11px;opacity:.6;font-weight:300;letter-spacing:.06em}
+.btn-word{display:flex;align-items:center;gap:7px;padding:7px 18px;background:var(--gold);color:#fff;border:none;border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.03em;transition:all .2s;box-shadow:0 2px 8px rgba(184,150,110,.35)}
+.btn-word:hover{background:var(--gold-dk);transform:translateY(-1px)}
+.btn-word:disabled{opacity:.6;cursor:not-allowed;transform:none}
 
 /* ── LAYOUT ── */
-.layout { display: grid; grid-template-columns: 410px 1fr; flex: 1; overflow: hidden; }
+.layout{display:grid;grid-template-columns:410px 1fr;flex:1;overflow:hidden}
 
 /* ── FORM ── */
-.form-panel { background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-.form-scroll { flex: 1; overflow-y: auto; padding: 18px 20px; }
-.form-scroll::-webkit-scrollbar { width: 4px; }
-.form-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.form-panel{background:var(--surf);border-right:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden}
+.form-scroll{flex:1;overflow-y:auto;padding:16px 18px}
+.form-scroll::-webkit-scrollbar{width:4px}
+.form-scroll::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
 
-.sec { margin-bottom: 20px; }
-.sec-head {
-  font-size: 9.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
-  color: var(--navy); padding-bottom: 7px; border-bottom: 1.5px solid var(--navy-light);
-  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
-}
-.sec-head::before { content: ''; display: block; width: 3px; height: 11px; background: var(--navy); border-radius: 2px; }
+.sec{margin-bottom:18px}
+.sec-hd{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--navy);padding-bottom:7px;border-bottom:1.5px solid var(--navy-lt);margin-bottom:11px;display:flex;align-items:center;gap:6px}
+.sec-hd::before{content:'';display:block;width:3px;height:11px;background:var(--navy);border-radius:2px}
 
-.f { margin-bottom: 9px; }
-.f label { display: block; font-size: 10.5px; font-weight: 500; color: var(--text-mid); margin-bottom: 3px; }
-.req { color: var(--red); }
+.f{margin-bottom:8px}
+.f label{display:block;font-size:10.5px;font-weight:500;color:var(--tx2);margin-bottom:3px}
+.req{color:var(--red)}
+.f input,.f select,input.ci,select.cs{width:100%;padding:6px 9px;border:1px solid var(--bdr);border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:12px;color:var(--tx);background:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+.f input:focus,.f select:focus,input.ci:focus,select.cs:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(30,58,95,.1)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 
-/* Base input/select */
-.f input[type="text"], .f input[type="date"], .f input[type="number"], .f select,
-input.cell-in, select.cell-sel {
-  width: 100%; padding: 6px 9px;
-  border: 1px solid var(--border); border-radius: 5px;
-  font-family: 'Noto Sans KR', sans-serif; font-size: 12px;
-  color: var(--text); background: #fff; outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
-}
-.f input:focus, .f select:focus, input.cell-in:focus, select.cell-sel:focus {
-  border-color: var(--navy); box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
-}
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* 구매자 칩 */
+.buyer-chips{display:flex;gap:5px;margin-bottom:8px;flex-wrap:wrap}
+.chip{padding:4px 12px;border-radius:20px;border:1.5px solid var(--bdr);background:#fff;font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:500;color:var(--tx2);cursor:pointer;transition:all .15s}
+.chip:hover{border-color:var(--navy);color:var(--navy)}
+.chip.on{border-color:var(--navy);background:var(--navy);color:#fff}
 
-/* ── ITEM TABLE ── */
-.tbl-head {
-  display: grid; grid-template-columns: 130px 1fr 54px 26px;
-  gap: 5px; font-size: 9.5px; font-weight: 600; color: var(--text-muted);
-  padding-bottom: 5px; border-bottom: 1px solid var(--border-light); margin-bottom: 6px;
-}
-.item-row { display: grid; grid-template-columns: 130px 1fr 54px 26px; gap: 5px; margin-bottom: 5px; align-items: center; }
-.item-row select.cell-sel, .item-row input.cell-in { font-size: 11px; padding: 5px 6px; }
-.item-row input[type="number"] { text-align: center; }
-
-.btn-del {
-  width: 26px; height: 26px; background: var(--red-light); border: 1px solid #e0c0c5;
-  border-radius: 4px; color: var(--red); font-size: 15px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center; transition: all 0.15s;
-}
-.btn-del:hover { background: #f5d0d5; }
-.btn-add {
-  width: 100%; margin-top: 4px; padding: 6px;
-  border: 1.5px dashed var(--border); border-radius: 5px;
-  background: transparent; color: var(--text-muted);
-  font-family: 'Noto Sans KR', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.15s;
-}
-.btn-add:hover { border-color: var(--navy); color: var(--navy); background: var(--navy-xlight); }
-
-/* ── BUYER DROPDOWN ── */
-.buyer-preset {
-  display: flex; gap: 5px; margin-bottom: 8px; flex-wrap: wrap;
-}
-.buyer-chip {
-  padding: 4px 11px; border-radius: 20px; border: 1.5px solid var(--border);
-  background: #fff; font-family: 'Noto Sans KR', sans-serif; font-size: 11px;
-  font-weight: 500; color: var(--text-mid); cursor: pointer; transition: all 0.15s;
-}
-.buyer-chip:hover { border-color: var(--navy); color: var(--navy); }
-.buyer-chip.active { border-color: var(--navy); background: var(--navy); color: #fff; }
+/* 아이템 행 */
+.tbl-hd{display:grid;grid-template-columns:138px 1fr 52px 26px;gap:5px;font-size:9.5px;font-weight:600;color:var(--tx3);padding-bottom:5px;border-bottom:1px solid var(--bdr-lt);margin-bottom:6px}
+.item-r{display:grid;grid-template-columns:138px 1fr 52px 26px;gap:5px;margin-bottom:5px;align-items:start}
+.item-r select.cs,.item-r input.ci{font-size:11px;padding:5px 6px}
+.item-r input[type=number]{text-align:center}
+.btn-del{width:26px;height:26px;background:var(--red-lt);border:1px solid #e0c0c5;border-radius:4px;color:var(--red);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;line-height:1;flex-shrink:0;margin-top:0}
+.btn-del:hover{background:#f5d0d5}
+.btn-add{width:100%;margin-top:4px;padding:6px;border:1.5px dashed var(--bdr);border-radius:5px;background:transparent;color:var(--tx3);font-family:'Noto Sans KR',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.btn-add:hover{border-color:var(--navy);color:var(--navy);background:var(--navy-xl)}
 
 /* ── PREVIEW ── */
-.preview-panel { display: flex; flex-direction: column; background: #e4e0da; overflow: hidden; }
-.preview-bar {
-  background: var(--surface); border-bottom: 1px solid var(--border);
-  padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
-}
-.pbar-left { display: flex; align-items: center; gap: 8px; }
-.pbar-label { font-size: 10px; font-weight: 700; color: var(--text-muted); letter-spacing: 0.08em; text-transform: uppercase; }
-.badge-live { font-size: 9px; font-weight: 600; background: var(--green-light); color: var(--green); border: 1px solid #b0d8be; border-radius: 20px; padding: 1px 8px; }
-.btn-print { padding: 5px 13px; border: 1px solid var(--border); border-radius: 5px; background: #fff; color: var(--text-mid); font-family: 'Noto Sans KR', sans-serif; font-size: 11px; cursor: pointer; transition: all 0.15s; }
-.btn-print:hover { border-color: var(--navy); color: var(--navy); }
+.preview-panel{display:flex;flex-direction:column;background:#e4e0da;overflow:hidden}
+.pbar{background:var(--surf);border-bottom:1px solid var(--bdr);padding:8px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.pbar-l{display:flex;align-items:center;gap:8px}
+.pbar-lbl{font-size:10px;font-weight:700;color:var(--tx3);letter-spacing:.08em;text-transform:uppercase}
+.badge{font-size:9px;font-weight:600;background:var(--grn-lt);color:var(--grn);border:1px solid #b0d8be;border-radius:20px;padding:1px 8px}
+.btn-print{padding:5px 13px;border:1px solid var(--bdr);border-radius:5px;background:var(--surf);color:var(--tx2);font-family:'Noto Sans KR',sans-serif;font-size:11px;cursor:pointer;transition:all .15s}
+.btn-print:hover{border-color:var(--navy);color:var(--navy)}
+.prev-scroll{flex:1;overflow-y:auto;padding:28px;display:flex;justify-content:center}
+.prev-scroll::-webkit-scrollbar{width:5px}
+.prev-scroll::-webkit-scrollbar-thumb{background:#bab5ae;border-radius:3px}
 
-.preview-scroll { flex: 1; overflow-y: auto; padding: 28px; display: flex; justify-content: center; }
-.preview-scroll::-webkit-scrollbar { width: 5px; }
-.preview-scroll::-webkit-scrollbar-thumb { background: #bab5ae; border-radius: 3px; }
-
-/* ── DOCUMENT ── */
-.doc { background: #fff; width: 680px; min-height: 860px; box-shadow: var(--shadow-lg); padding: 60px 68px; font-family: 'Noto Serif KR', serif; color: #1c1a18; position: relative; }
-.doc-wm { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-28deg); font-size: 72px; font-weight: 700; color: rgba(30,58,95,0.035); white-space: nowrap; pointer-events: none; letter-spacing: 0.1em; }
-.doc-title { text-align: center; font-size: 26px; font-weight: 700; letter-spacing: 0.2em; padding-bottom: 14px; margin-bottom: 28px; text-decoration: underline; text-underline-offset: 5px; border-bottom: 2.5px solid #1c1a18; }
-.doc-meta { margin-bottom: 22px; }
-.doc-meta-row { display: flex; align-items: baseline; margin-bottom: 5px; font-size: 13px; line-height: 1.7; }
-.doc-meta-lbl { color: #666; min-width: 148px; }
-.doc-meta-val { border-bottom: 1px solid #999; min-width: 130px; font-weight: 500; padding: 0 4px 1px; }
-.doc-intro { font-size: 12.5px; line-height: 2; margin-bottom: 22px; color: #3a3630; }
-.doc-sec-title { font-size: 13.5px; font-weight: 600; margin-bottom: 10px; }
-.doc-gap { margin-bottom: 20px; }
-.doc-table { width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 11.5px; font-family: 'Noto Sans KR', sans-serif; }
-.doc-table th { background: #f2efe9; border: 1px solid #c8c0b5; padding: 6px 10px; text-align: center; font-weight: 600; font-size: 11px; }
-.doc-table td { border: 1px solid #c8c0b5; padding: 6px 10px; }
-.doc-table td.c { text-align: center; } .doc-table td.l { text-align: left; }
-.doc-amount { font-size: 13.5px; font-weight: 600; margin-bottom: 22px; }
-.doc-ul { border-bottom: 1.5px solid #1c1a18; }
-.doc-closing { font-size: 12px; line-height: 2.1; color: #3a3630; margin-bottom: 26px; }
-.sig-table { width: 100%; border-collapse: collapse; font-size: 11.5px; font-family: 'Noto Sans KR', sans-serif; }
-.sig-table td { border: 1px solid #c8c0b5; padding: 9px 13px; vertical-align: top; line-height: 1.9; }
-.sig-table .sig-hdr { background: #f2efe9; font-weight: 700; font-size: 12px; text-align: center; }
-.sig-lbl { color: #888; font-size: 10.5px; }
+/* ── DOCUMENT 미리보기 ── */
+.doc{background:#fff;width:700px;min-height:900px;box-shadow:var(--shl);padding:55px 65px;font-family:'Noto Serif KR',serif;color:#1c1a18;position:relative;font-size:13px;line-height:1.6}
+.doc-wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-28deg);font-size:70px;font-weight:700;color:rgba(30,58,95,.035);white-space:nowrap;pointer-events:none;letter-spacing:.1em}
+/* 제목 */
+.doc-title{text-align:center;font-size:24px;font-weight:700;letter-spacing:.2em;padding-bottom:12px;margin-bottom:22px;text-decoration:underline;text-underline-offset:5px;border-bottom:2.5px solid #1c1a18}
+/* 메타 */
+.doc-meta{margin-bottom:20px}
+.doc-meta-row{display:flex;margin-bottom:4px;font-size:12.5px;line-height:1.8;font-family:'Noto Sans KR',sans-serif}
+.doc-meta-lbl{min-width:110px;color:#555}
+.doc-meta-tab{min-width:30px}
+.doc-meta-colon{margin-right:6px;color:#555}
+.doc-meta-val{border-bottom:1px solid #888;padding:0 4px 1px;font-weight:500;min-width:120px}
+/* 도입 */
+.doc-intro{font-size:12px;line-height:1.9;margin-bottom:18px;font-family:'Noto Sans KR',sans-serif;color:#333}
+/* 섹션제목 */
+.doc-snum{font-weight:600;font-size:13px;margin-bottom:8px;font-family:'Noto Sans KR',sans-serif;display:flex;gap:4px}
+.doc-snum .num{min-width:20px}
+/* 서브제목 */
+.doc-sub{font-weight:600;font-size:12.5px;margin:12px 0 8px 20px;font-family:'Noto Sans KR',sans-serif}
+/* 구성품 테이블 */
+.doc-tbl{width:100%;border-collapse:collapse;margin-bottom:4px;font-size:11.5px;font-family:'Noto Sans KR',sans-serif}
+.doc-tbl th{background:#f0ece5;border:1px solid #bbb;padding:5px 9px;text-align:center;font-weight:600;font-size:11px}
+.doc-tbl td{border:1px solid #bbb;padding:5px 9px}
+.doc-tbl td.c{text-align:center}
+/* 금액 */
+.doc-amount{font-size:13px;font-weight:600;margin-bottom:20px;font-family:'Noto Sans KR',sans-serif;display:flex;gap:4px}
+.doc-ul{border-bottom:1.5px solid #1c1a18}
+/* 클로징 */
+.doc-closing{font-size:11.5px;line-height:2;color:#333;margin-bottom:24px;font-family:'Noto Sans KR',sans-serif}
+/* 서명 테이블 */
+.sig-tbl{width:100%;border-collapse:collapse;font-size:11.5px;font-family:'Noto Sans KR',sans-serif;border:2px solid #888}
+.sig-tbl td{border:1.5px solid #888;padding:8px 12px;vertical-align:middle;line-height:1.8}
+.sig-tbl td.hd{font-weight:600;font-size:12px}
+.sig-tbl td.center{text-align:center}
+.sig-lbl{color:#666;font-size:10.5px}
 
 /* ── TOAST ── */
-.toast {
-  position: fixed; bottom: 22px; right: 22px;
-  background: var(--navy-dark); color: #fff;
-  padding: 10px 18px; border-radius: 6px;
-  font-size: 12px; font-weight: 500; box-shadow: var(--shadow-lg);
-  transform: translateY(50px); opacity: 0;
-  transition: all 0.28s cubic-bezier(0.34,1.56,0.64,1);
-  z-index: 999; pointer-events: none;
-}
-.toast.show { transform: translateY(0); opacity: 1; }
-@media print {
-  header, .form-panel, .preview-bar { display: none !important; }
-  .layout { display: block !important; }
-  .preview-scroll { padding: 0 !important; }
-  .doc { box-shadow: none !important; width: 100% !important; padding: 15mm 20mm !important; }
-}
+.toast{position:fixed;bottom:22px;right:22px;color:#fff;padding:10px 18px;border-radius:6px;font-size:12px;font-weight:500;box-shadow:var(--shl);transform:translateY(50px);opacity:0;transition:all .28s cubic-bezier(.34,1.56,.64,1);z-index:999;pointer-events:none}
+.toast.show{transform:translateY(0);opacity:1}
+@media print{header,.form-panel,.pbar{display:none!important}.layout{display:block!important}.prev-scroll{padding:0!important}.doc{box-shadow:none!important;width:100%!important;padding:15mm 18mm!important}}
 </style>
 </head>
 <body>
-
 <header>
-  <div class="hd-left">
+  <div class="hd-l">
     <span class="hd-brand">Syneron Candela Korea</span>
     <div class="hd-dot"></div>
     <span class="hd-sub">부속합의서 생성기</span>
   </div>
-  <button class="btn-word" id="wordBtn" onclick="exportWord()">
+  <button class="btn-word" id="wBtn" onclick="exportWord()">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
     Word로 저장
   </button>
 </header>
 
 <div class="layout">
-
 <!-- ── FORM PANEL ── -->
 <aside class="form-panel">
 <div class="form-scroll">
 
-  <!-- 기본 정보 -->
   <div class="sec">
-    <div class="sec-head">기본 정보</div>
+    <div class="sec-hd">기본 정보</div>
     <div class="f"><label>구매계약서 번호 <span class="req">*</span></label>
-      <input type="text" id="contractNo" value="20241206001" oninput="render()"></div>
+      <input type="text" id="cNo" value="20241206001" oninput="render()"></div>
     <div class="row2">
       <div class="f"><label>계약서 체결일자</label>
-        <input type="date" id="contractDate" value="2024-12-06" onchange="render()"></div>
+        <input type="date" id="cDate" value="2024-12-06" onchange="render()"></div>
       <div class="f"><label>부속합의 일자</label>
-        <input type="date" id="addendumDate" value="2026-03-25" onchange="render()"></div>
+        <input type="date" id="aDate" value="2026-03-25" onchange="render()"></div>
     </div>
   </div>
 
-  <!-- 변경 전 구성품 -->
   <div class="sec">
-    <div class="sec-head">변경 전 구성품</div>
-    <div class="tbl-head"><span>구성품 번호</span><span>구성품명</span><span style="text-align:center">수량</span><span></span></div>
-    <div id="beforeRows"></div>
-    <button class="btn-add" onclick="addRow('before')">＋ 행 추가</button>
+    <div class="sec-hd">변경 전 구성품</div>
+    <div class="tbl-hd"><span>구성품 번호</span><span>구성품명</span><span style="text-align:center">수량</span><span></span></div>
+    <div id="bRows"></div>
+    <button class="btn-add" onclick="addRow('b')">＋ 행 추가</button>
   </div>
 
-  <!-- 변경 후 구성품 -->
   <div class="sec">
-    <div class="sec-head">변경 후 구성품</div>
-    <div class="tbl-head"><span>구성품 번호</span><span>구성품명</span><span style="text-align:center">수량</span><span></span></div>
-    <div id="afterRows"></div>
-    <button class="btn-add" onclick="addRow('after')">＋ 행 추가</button>
+    <div class="sec-hd">변경 후 구성품</div>
+    <div class="tbl-hd"><span>구성품 번호</span><span>구성품명</span><span style="text-align:center">수량</span><span></span></div>
+    <div id="aRows"></div>
+    <button class="btn-add" onclick="addRow('a')">＋ 행 추가</button>
   </div>
 
-  <!-- 계약금액 -->
   <div class="sec">
-    <div class="sec-head">최종 계약금액</div>
+    <div class="sec-hd">최종 계약금액</div>
     <div class="f"><label>변경 후 금액 (VAT 포함) <span class="req">*</span></label>
-      <input type="text" id="amount" value="150,000,000" oninput="fmtAmt(this);render()"></div>
+      <input type="text" id="amt" value="150,000,000" oninput="fmtAmt(this);render()"></div>
   </div>
 
-  <!-- 판매자 -->
   <div class="sec">
-    <div class="sec-head">판매자 (Candela Korea)</div>
-    <div class="f"><label>회사명</label><input type="text" id="sellerName" value="시너론 켄델라 코리아 유한회사" oninput="render()"></div>
-    <div class="f"><label>주소</label><input type="text" id="sellerAddr" value="서울시 서초구 강남대로 327 대륭서초타워 3층 (우: 06627)" oninput="render()"></div>
+    <div class="sec-hd">판매자 (Candela Korea)</div>
+    <div class="f"><label>회사명</label><input type="text" id="sName" value="시너론 켄델라 코리아 유한회사" oninput="render()"></div>
+    <div class="f"><label>주소</label><input type="text" id="sAddr" value="서울시 서초구 강남대로 327 대륭서초타워 3층 (우: 06627)" oninput="render()"></div>
     <div class="row2">
-      <div class="f"><label>대표자명</label><input type="text" id="sellerRep" value="유지쿠리키" oninput="render()"></div>
-      <div class="f"><label>사업자등록번호</label><input type="text" id="sellerBiz" value="729-87-01057" oninput="render()"></div>
+      <div class="f"><label>대표자명</label><input type="text" id="sRep" value="유지쿠리키" oninput="render()"></div>
+      <div class="f"><label>사업자등록번호</label><input type="text" id="sBiz" value="729-87-01057" oninput="render()"></div>
     </div>
-    <div class="f"><label>법인등록번호</label><input type="text" id="sellerCorp" value="110114-0225232" oninput="render()"></div>
+    <div class="f"><label>법인등록번호</label><input type="text" id="sCorp" value="110114-0225232" oninput="render()"></div>
   </div>
 
-  <!-- 구매자 -->
   <div class="sec">
-    <div class="sec-head">구매자</div>
-    <!-- 프리셋 칩 -->
-    <div class="buyer-preset">
-      <button class="buyer-chip active" onclick="setBuyer('inomed')">㈜이노메드</button>
-      <button class="buyer-chip" onclick="setBuyer('sevenu')">쎄븐유</button>
-      <button class="buyer-chip" onclick="setBuyer('custom')">직접 입력</button>
+    <div class="sec-hd">구매자</div>
+    <div class="buyer-chips">
+      <button class="chip on" onclick="setBuyer('inomed',this)">㈜이노메드</button>
+      <button class="chip" onclick="setBuyer('sevenu',this)">쎄븐유</button>
+      <button class="chip" onclick="setBuyer('custom',this)">직접 입력</button>
     </div>
-    <div class="f"><label>회사 / 병원명 <span class="req">*</span></label><input type="text" id="buyerName" oninput="markCustom();render()"></div>
-    <div class="f"><label>주소</label><input type="text" id="buyerAddr" oninput="render()"></div>
+    <div class="f"><label>회사 / 병원명 <span class="req">*</span></label><input type="text" id="bName" oninput="markCustom();render()"></div>
+    <div class="f"><label>주소</label><input type="text" id="bAddr" oninput="render()"></div>
     <div class="row2">
-      <div class="f"><label>성명 / 직책</label><input type="text" id="buyerRep" oninput="render()"></div>
-      <div class="f"><label>사업자등록번호</label><input type="text" id="buyerBiz" oninput="render()"></div>
+      <div class="f"><label>성명 / 직책</label><input type="text" id="bRep" oninput="render()"></div>
+      <div class="f"><label>사업자등록번호</label><input type="text" id="bBiz" oninput="render()"></div>
     </div>
   </div>
 
-</div><!-- /form-scroll -->
+</div>
 </aside>
 
-<!-- ── PREVIEW PANEL ── -->
+<!-- ── PREVIEW ── -->
 <main class="preview-panel">
-  <div class="preview-bar">
-    <div class="pbar-left">
-      <span class="pbar-label">미리보기</span>
-      <span class="badge-live">● LIVE</span>
+  <div class="pbar">
+    <div class="pbar-l">
+      <span class="pbar-lbl">미리보기</span>
+      <span class="badge">● LIVE</span>
     </div>
     <button class="btn-print" onclick="window.print()">🖨️ 인쇄</button>
   </div>
-  <div class="preview-scroll">
-    <div class="doc" id="docPreview"></div>
+  <div class="prev-scroll">
+    <div class="doc" id="doc"></div>
   </div>
 </main>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ── 드롭다운 옵션 (워드 파일에서 확인한 실제 목록) ────────────────
-const PART_NUMBERS = [
-  "7123-CE-0650",
-  "7123-CE-0632",
-  "7123-CE-0652",
-  "7123-CE-0653",
-  "FIN100834",
-  "FIN101958",
-  "FIN101959",
-];
-const PART_NAMES = [
-  "GMPP DCD Small",
-  "GMPP DCD Medium",
-  "GMPP DCD Large",
-  "GMPP ACC Large",
-  "Zimmer Cryo7",
-  "GMPP Modified LSDS Options Kit for DCD",
-  "GMPP Modified LSDS Options Kit for ACC",
-];
+// ── 드롭다운 데이터 (원본 워드에서 추출) ─────────────────────────
+const NUMS_BEFORE = ['7123-CE-0650','7123-CE-0632','7123-CE-0652','7123-CE-0653','FIN100834'];
+const NUMS_AFTER  = ['7123-CE-0650','7123-CE-0632','7123-CE-0652','7123-CE-0653','FIN100834','FIN101958','FIN101959'];
+const NAMES_BEFORE= ['GMPP DCD Small','GMPP DCD Medium','GMPP DCD Large','GMPP ACC Large','Zimmer Cryo7'];
+const NAMES_AFTER = ['GMPP DCD Small','GMPP DCD Medium','GMPP DCD Large','GMPP ACC Large','Zimmer Cryo7','GMPP Modified LSDS Options Kit for DCD','GMPP Modified LSDS Options Kit for ACC'];
 
-// 번호↔이름 매핑
-const NO_TO_NAME = {
-  "7123-CE-0650": "GMPP DCD Small",
-  "7123-CE-0632": "GMPP DCD Medium",
-  "7123-CE-0652": "GMPP DCD Large",
-  "7123-CE-0653": "GMPP ACC Large",
-  "FIN100834":    "Zimmer Cryo7",
-  "FIN101958":    "GMPP Modified LSDS Options Kit for DCD",
-  "FIN101959":    "GMPP Modified LSDS Options Kit for ACC",
+const NO2NAME = {
+  '7123-CE-0650':'GMPP DCD Small','7123-CE-0632':'GMPP DCD Medium',
+  '7123-CE-0652':'GMPP DCD Large','7123-CE-0653':'GMPP ACC Large',
+  'FIN100834':'Zimmer Cryo7',
+  'FIN101958':'GMPP Modified LSDS Options Kit for DCD',
+  'FIN101959':'GMPP Modified LSDS Options Kit for ACC',
 };
-const NAME_TO_NO = Object.fromEntries(Object.entries(NO_TO_NAME).map(([k,v])=>[v,k]));
+const NAME2NO = Object.fromEntries(Object.entries(NO2NAME).map(([k,v])=>[v,k]));
 
 // ── 구매자 프리셋 ─────────────────────────────────────────────────
 const BUYERS = {
-  inomed: {
-    name: "㈜이노메드",
-    addr: "서울시 용산구 한강대로 257 2층,4층(갈월동,청룡빌딩) (04322)",
-    rep:  "변승환",
-    biz:  "106-81-97189",
-  },
-  sevenu: {
-    name: "쎄븐유",
-    addr: "",
-    rep:  "",
-    biz:  "",
-  },
+  inomed:{ name:'㈜이노메드', addr:'서울시 용산구 한강대로 257 2층,4층(갈월동,청룡빌딩) (04322)', rep:'변승환', biz:'106-81-97189' },
+  sevenu:{ name:'쎄븐유', addr:'', rep:'', biz:'' },
 };
 
-let currentBuyerPreset = 'inomed';
+// ── 상태 ──────────────────────────────────────────────────────────
+let bItems=[
+  {no:'7123-CE-0650',name:'GMPP DCD Small',qty:1},
+  {no:'7123-CE-0632',name:'GMPP DCD Medium',qty:1},
+  {no:'7123-CE-0653',name:'GMPP ACC Large',qty:1},
+];
+let aItems=[
+  {no:'FIN101958',name:'GMPP Modified LSDS Options Kit for DCD',qty:2},
+];
 
-function setBuyer(key) {
-  currentBuyerPreset = key;
-  document.querySelectorAll('.buyer-chip').forEach(c => c.classList.remove('active'));
-  event.target.classList.add('active');
+// ── 유틸 ──────────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+const val=id=>$(id).value.trim();
+const set=(id,v)=>{$(id).value=v};
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-  if (key === 'custom') {
-    setField('buyerName', '');
-    setField('buyerAddr', '');
-    setField('buyerRep', '');
-    setField('buyerBiz', '');
-    document.getElementById('buyerName').focus();
-  } else {
-    const d = BUYERS[key];
-    setField('buyerName', d.name);
-    setField('buyerAddr', d.addr);
-    setField('buyerRep',  d.rep);
-    setField('buyerBiz',  d.biz);
-  }
+function fmtAmt(el){const n=el.value.replace(/[^0-9]/g,'');el.value=n?parseInt(n).toLocaleString('ko-KR'):'';}
+function dateKo(s){if(!s)return'';const[y,m,d]=s.split('-');return`${y}년 ${+m}월 ${+d}일`;}
+
+function toast(msg,ok=true){
+  const t=$('toast');t.textContent=msg;
+  t.style.background=ok?'#1e3a5f':'#8b2030';
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── 구매자 ────────────────────────────────────────────────────────
+function setBuyer(key,btn){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));
+  btn.classList.add('on');
+  if(key==='custom'){set('bName','');set('bAddr','');set('bRep','');set('bBiz','');$('bName').focus();}
+  else{const d=BUYERS[key];set('bName',d.name);set('bAddr',d.addr);set('bRep',d.rep);set('bBiz',d.biz);}
   render();
 }
-
-function markCustom() {
-  currentBuyerPreset = 'custom';
-  document.querySelectorAll('.buyer-chip').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.buyer-chip')[2].classList.add('active');
+function markCustom(){
+  document.querySelectorAll('.chip').forEach((c,i)=>{c.classList.toggle('on',i===2)});
 }
 
-// ── state ─────────────────────────────────────────────────────────
-let beforeItems = [
-  { no: "7123-CE-0650", name: "GMPP DCD Small",   qty: 1 },
-  { no: "7123-CE-0632", name: "GMPP DCD Medium",  qty: 1 },
-  { no: "7123-CE-0653", name: "GMPP ACC Large",   qty: 1 },
-];
-let afterItems = [
-  { no: "FIN101958", name: "GMPP Modified LSDS Options Kit for DCD", qty: 2 },
-];
-
-// ── helpers ───────────────────────────────────────────────────────
-const $ = id => document.getElementById(id);
-const val = id => $(id).value.trim();
-const setField = (id, v) => { $(id).value = v; };
-
-function fmtAmt(el) {
-  const n = el.value.replace(/[^0-9]/g,'');
-  el.value = n ? parseInt(n).toLocaleString('ko-KR') : '';
+// ── 아이템 행 렌더 ────────────────────────────────────────────────
+function numOpts(nums,sel){
+  return `<option value="">— 선택 —</option>`+
+    nums.map(n=>`<option value="${n}"${sel===n?' selected':''}>${n}</option>`).join('')+
+    `<option value="__"${sel==='__'?' selected':''}>직접 입력</option>`;
 }
-function dateKo(s) {
-  if (!s) return '';
-  const [y,m,d] = s.split('-');
-  return `${y}년 ${parseInt(m)}월 ${parseInt(d)}일`;
-}
-function esc(s) { return String(s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
-function toast(msg, ok=true) {
-  const t=$('toast'); t.textContent=msg;
-  t.style.background = ok ? '#1e3a5f' : '#8b2030';
-  t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2600);
+function nameOpts(names,sel){
+  return `<option value="">— 선택 —</option>`+
+    names.map(n=>`<option value="${esc(n)}"${sel===n?' selected':''}>${esc(n)}</option>`).join('')+
+    `<option value="__"${sel==='__'?' selected':''}>직접 입력</option>`;
 }
 
-// ── 옵션 HTML ─────────────────────────────────────────────────────
-function noOpts(sel) {
-  return `<option value="">— 선택 —</option>` +
-    PART_NUMBERS.map(n=>`<option value="${n}"${sel===n?' selected':''}>${n}</option>`).join('') +
-    `<option value="__custom__"${sel==='__custom__'?' selected':''}>직접 입력</option>`;
-}
-function nameOpts(sel) {
-  return `<option value="">— 선택 —</option>` +
-    PART_NAMES.map(n=>`<option value="${n}"${sel===n?' selected':''}>${n}</option>`).join('') +
-    `<option value="__custom__"${sel==='__custom__'?' selected':''}>직접 입력</option>`;
-}
+function renderRows(arr,cid,numList,nameList){
+  const el=$(cid);el.innerHTML='';
+  arr.forEach((item,i)=>{
+    const customNo  = item.no   && !numList.includes(item.no);
+    const customName= item.name && !nameList.includes(item.no ? NO2NAME[item.no]||item.name : item.name);
 
-// ── row 렌더 ──────────────────────────────────────────────────────
-function renderRows(arr, cid) {
-  const el = $(cid);
-  el.innerHTML = '';
-  arr.forEach((item, i) => {
-    const useCustomNo   = item.no   && !PART_NUMBERS.includes(item.no);
-    const useCustomName = item.name && !PART_NAMES.includes(item.name);
+    const wrap=document.createElement('div');
+    wrap.className='item-r';
 
-    const row = document.createElement('div');
-    row.className = 'item-row';
-    row.style.cssText = 'display:grid;grid-template-columns:130px 1fr 54px 26px;gap:5px;margin-bottom:5px;align-items:start;';
-
-    // -- 구성품 번호 셀 (셀렉트 + 옵션 직접입력시 텍스트)
-    const noWrap = document.createElement('div');
-    noWrap.style.display = 'flex'; noWrap.style.flexDirection = 'column'; noWrap.style.gap = '3px';
-    const noSel = document.createElement('select');
-    noSel.className = 'cell-sel';
-    noSel.innerHTML = noOpts(useCustomNo ? '__custom__' : item.no);
-    noSel.onchange = () => {
-      if (noSel.value === '__custom__') {
-        arr[i].no = '';
-      } else {
-        arr[i].no = noSel.value;
-        // 번호 선택 시 이름 자동 매핑
-        if (NO_TO_NAME[noSel.value]) {
-          arr[i].name = NO_TO_NAME[noSel.value];
-        }
-        renderRows(arr, cid);
+    // ── 번호 셀
+    const nWrap=document.createElement('div');
+    nWrap.style.cssText='display:flex;flex-direction:column;gap:3px';
+    const nSel=document.createElement('select');nSel.className='cs';
+    nSel.innerHTML=numOpts(numList, customNo?'__':item.no);
+    nSel.onchange=()=>{
+      if(nSel.value==='__'){arr[i].no='';renderRows(arr,cid,numList,nameList);}
+      else{
+        arr[i].no=nSel.value;
+        if(NO2NAME[nSel.value]&&nameList.includes(NO2NAME[nSel.value])){arr[i].name=NO2NAME[nSel.value];}
+        renderRows(arr,cid,numList,nameList);
       }
       render();
     };
-    noWrap.appendChild(noSel);
-    if (useCustomNo || noSel.value === '__custom__') {
-      const noIn = document.createElement('input');
-      noIn.type = 'text'; noIn.className = 'cell-in';
-      noIn.placeholder = '번호 직접 입력';
-      noIn.value = useCustomNo ? item.no : '';
-      noIn.oninput = () => { arr[i].no = noIn.value; render(); };
-      noWrap.appendChild(noIn);
+    nWrap.appendChild(nSel);
+    if(customNo||nSel.value==='__'){
+      const nIn=document.createElement('input');nIn.type='text';nIn.className='ci';
+      nIn.placeholder='번호 입력';nIn.value=customNo?item.no:'';
+      nIn.oninput=()=>{arr[i].no=nIn.value;render();};
+      nWrap.appendChild(nIn);
     }
-    row.appendChild(noWrap);
+    wrap.appendChild(nWrap);
 
-    // -- 구성품명 셀
-    const nameWrap = document.createElement('div');
-    nameWrap.style.display = 'flex'; nameWrap.style.flexDirection = 'column'; nameWrap.style.gap = '3px';
-    const nameSel = document.createElement('select');
-    nameSel.className = 'cell-sel';
-    nameSel.innerHTML = nameOpts(useCustomName ? '__custom__' : item.name);
-    nameSel.onchange = () => {
-      if (nameSel.value === '__custom__') {
-        arr[i].name = '';
-      } else {
-        arr[i].name = nameSel.value;
-        // 이름 선택 시 번호 자동 매핑
-        if (NAME_TO_NO[nameSel.value]) {
-          arr[i].no = NAME_TO_NO[nameSel.value];
-        }
-        renderRows(arr, cid);
+    // ── 이름 셀
+    const nmWrap=document.createElement('div');
+    nmWrap.style.cssText='display:flex;flex-direction:column;gap:3px';
+    const nmSel=document.createElement('select');nmSel.className='cs';
+    const currentNameInList=nameList.includes(item.name);
+    nmSel.innerHTML=nameOpts(nameList, currentNameInList?item.name:(item.name?'__':''));
+    nmSel.onchange=()=>{
+      if(nmSel.value==='__'){arr[i].name='';renderRows(arr,cid,numList,nameList);}
+      else{
+        arr[i].name=nmSel.value;
+        if(NAME2NO[nmSel.value]&&numList.includes(NAME2NO[nmSel.value])){arr[i].no=NAME2NO[nmSel.value];}
+        renderRows(arr,cid,numList,nameList);
       }
       render();
     };
-    nameWrap.appendChild(nameSel);
-    if (useCustomName || nameSel.value === '__custom__') {
-      const nameIn = document.createElement('input');
-      nameIn.type = 'text'; nameIn.className = 'cell-in';
-      nameIn.placeholder = '구성품명 직접 입력';
-      nameIn.value = useCustomName ? item.name : '';
-      nameIn.oninput = () => { arr[i].name = nameIn.value; render(); };
-      nameWrap.appendChild(nameIn);
+    nmWrap.appendChild(nmSel);
+    if(!currentNameInList&&item.name){
+      const nmIn=document.createElement('input');nmIn.type='text';nmIn.className='ci';
+      nmIn.placeholder='구성품명 입력';nmIn.value=item.name;
+      nmIn.oninput=()=>{arr[i].name=nmIn.value;render();};
+      nmWrap.appendChild(nmIn);
     }
-    row.appendChild(nameWrap);
+    if(nmSel.value==='__'&&!item.name){
+      const nmIn=document.createElement('input');nmIn.type='text';nmIn.className='ci';
+      nmIn.placeholder='구성품명 입력';nmIn.value='';
+      nmIn.oninput=()=>{arr[i].name=nmIn.value;render();};
+      nmWrap.appendChild(nmIn);
+    }
+    wrap.appendChild(nmWrap);
 
-    // -- 수량
-    const qtyIn = document.createElement('input');
-    qtyIn.type = 'number'; qtyIn.className = 'cell-in';
-    qtyIn.value = item.qty; qtyIn.min = 1; qtyIn.style.textAlign = 'center';
-    qtyIn.oninput = () => { arr[i].qty = parseInt(qtyIn.value)||1; render(); };
-    row.appendChild(qtyIn);
+    // ── 수량
+    const qIn=document.createElement('input');qIn.type='number';qIn.className='ci';
+    qIn.value=item.qty;qIn.min=1;qIn.style.textAlign='center';
+    qIn.oninput=()=>{arr[i].qty=parseInt(qIn.value)||1;render();};
+    wrap.appendChild(qIn);
 
-    // -- 삭제
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn-del'; delBtn.textContent = '×'; delBtn.title = '삭제';
-    delBtn.onclick = () => { arr.splice(i,1); renderRows(arr,cid); render(); };
-    row.appendChild(delBtn);
+    // ── 삭제
+    const dBtn=document.createElement('button');dBtn.className='btn-del';dBtn.textContent='×';dBtn.title='삭제';
+    dBtn.onclick=()=>{arr.splice(i,1);renderRows(arr,cid,numList,nameList);render();};
+    wrap.appendChild(dBtn);
 
-    el.appendChild(row);
+    el.appendChild(wrap);
   });
 }
 
-function addRow(type) {
-  const arr = type==='before' ? beforeItems : afterItems;
-  const cid = type==='before' ? 'beforeRows' : 'afterRows';
-  arr.push({ no:'', name:'', qty:1 });
-  renderRows(arr, cid);
+function addRow(type){
+  if(type==='b'){bItems.push({no:'',name:'',qty:1});renderRows(bItems,'bRows',NUMS_BEFORE,NAMES_BEFORE);}
+  else{aItems.push({no:'',name:'',qty:1});renderRows(aItems,'aRows',NUMS_AFTER,NAMES_AFTER);}
   render();
 }
 
-// ── PREVIEW ───────────────────────────────────────────────────────
-function tableHTML(arr) {
-  const rows = arr.map(r=>`<tr><td class="c">${esc(r.no)}</td><td class="l">${esc(r.name)}</td><td class="c">${r.qty}</td></tr>`).join('');
-  return `<table class="doc-table">
-    <thead><tr><th style="width:155px">구성품 번호</th><th>구성품</th><th style="width:55px">수량</th></tr></thead>
-    <tbody>${rows}</tbody></table>`;
+// ── 미리보기 렌더 ─────────────────────────────────────────────────
+function tblHTML(arr){
+  const rows=arr.map(r=>`<tr><td class="c">${esc(r.no)}</td><td>${esc(r.name)}</td><td class="c">${r.qty}</td></tr>`).join('');
+  return `<table class="doc-tbl"><thead><tr><th style="width:150px">구성품 번호</th><th>구성품</th><th style="width:55px">수량</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 
-function render() {
-  const sn=val('sellerName'), bn=val('buyerName');
-  const sa=val('sellerAddr'), ba=val('buyerAddr');
-  const sr=val('sellerRep'),  br=val('buyerRep');
-  const sbiz=val('sellerBiz'), bbiz=val('buyerBiz');
-  const scorp=val('sellerCorp'), amt=val('amount');
-
-  $('docPreview').innerHTML = `
+function render(){
+  const sn=val('sName'),bn=val('bName'),sa=val('sAddr'),ba=val('bAddr');
+  const sr=val('sRep'),br=val('bRep'),sbiz=val('sBiz'),bbiz=val('bBiz'),scorp=val('sCorp'),am=val('amt');
+  $('doc').innerHTML=`
     <div class="doc-wm">CANDELA KOREA</div>
     <div class="doc-title">부속 합의서</div>
     <div class="doc-meta">
-      <div class="doc-meta-row"><span class="doc-meta-lbl">구매계약서 번호 :</span><span class="doc-meta-val">${esc(val('contractNo'))}</span></div>
-      <div class="doc-meta-row"><span class="doc-meta-lbl">구매계약서 체결일자 :</span><span class="doc-meta-val">${dateKo(val('contractDate'))}</span></div>
-      <div class="doc-meta-row"><span class="doc-meta-lbl">부속 합의 일자 :</span><span class="doc-meta-val">${dateKo(val('addendumDate'))}</span></div>
+      <div class="doc-meta-row"><span class="doc-meta-lbl">구매계약서 번호</span><span class="doc-meta-tab"></span><span class="doc-meta-colon">:</span><span class="doc-meta-val">${esc(val('cNo'))}</span></div>
+      <div class="doc-meta-row"><span class="doc-meta-lbl">구매계약서 체결일자</span><span class="doc-meta-tab"></span><span class="doc-meta-colon">:</span><span class="doc-meta-val">${dateKo(val('cDate'))}</span></div>
+      <div class="doc-meta-row"><span class="doc-meta-lbl">부속 합의 일자</span><span class="doc-meta-tab"></span><span class="doc-meta-colon">:</span><span class="doc-meta-val">${dateKo(val('aDate'))}</span></div>
     </div>
     <div class="doc-intro">위 합의된 구매계약서의 구성품 중 일부가 아래와 같이 변경되어 이에 대하여 다음과 같이 합의합니다.</div>
-    <div class="doc-gap">
-      <div class="doc-sec-title">1.  변경 대상 구성품</div>
-      ${tableHTML(beforeItems)}
-      <div style="height:14px"></div>
-      <div class="doc-sec-title" style="font-size:13px">변경 후 구성품</div>
-      ${tableHTML(afterItems)}
-    </div>
-    <div class="doc-amount">2.  변경 후 최종 계약 금액 : <span class="doc-ul">${esc(amt)}</span>원(VAT포함)</div>
+    <div class="doc-snum"><span class="num">1.</span><span>변경 대상 구성품</span></div>
+    ${tblHTML(bItems)}
+    <div class="doc-sub">변경 후 구성품</div>
+    ${tblHTML(aItems)}
+    <div style="height:14px"></div>
+    <div class="doc-amount"><span class="num">2.</span><span>변경 후 최종 계약 금액 : <span class="doc-ul">${esc(am)}</span>원(VAT포함)</span></div>
     <div class="doc-closing">본 부속합의서에 명시된 해당 구성품 변경 외의 구매계약서 상의 다른 조건은 여전히 유효하며 양 당사자에게 구속력을 갖습니다. 각 당사자의 적법하게 수권 받은 대표는 본 부속 합의서 2부를 체결하여 각 당사자가 한 부씩 보관하며, 직인이 날인된 순간부터 해당 부속 합의서의 효력이 발휘됩니다.</div>
-    <table class="sig-table">
+    <table class="sig-tbl">
       <tr>
-        <td class="sig-hdr" style="width:50%">회사: ${esc(sn)}</td>
-        <td class="sig-hdr" style="width:50%">구매자: ${esc(bn)}</td>
+        <td colspan="2" class="hd">회사: ${esc(sn)}</td>
+        <td colspan="2" class="hd">구매자: ${esc(bn)}</td>
       </tr>
       <tr>
-        <td><span class="sig-lbl">주 소  </span>${esc(sa)}</td>
-        <td><span class="sig-lbl">주 소  </span>${esc(ba)}</td>
+        <td style="width:90px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td>
+        <td style="width:230px">${esc(sa)}</td>
+        <td style="width:90px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td>
+        <td>${esc(ba)}</td>
       </tr>
       <tr>
-        <td><span class="sig-lbl">대표자명  </span>${esc(sr)}&nbsp;&nbsp;&nbsp;(인)</td>
-        <td><span class="sig-lbl">성명/직책  </span>${br ? esc(br) : '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}&nbsp;&nbsp;&nbsp;(인)</td>
+        <td><span class="sig-lbl">대표자명</span></td>
+        <td class="center">${esc(sr)}&nbsp;&nbsp;(인)</td>
+        <td><span class="sig-lbl">성명/직책</span></td>
+        <td class="center">${br?esc(br)+'&nbsp;&nbsp;(인)':'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인)'}</td>
       </tr>
       <tr>
-        <td><span class="sig-lbl">사업자등록번호  </span>${esc(sbiz)}<br><span class="sig-lbl">법인등록번호  </span>${esc(scorp)}</td>
-        <td><span class="sig-lbl">사업자등록번호  </span>${esc(bbiz)}</td>
+        <td colspan="2" class="center"><span class="sig-lbl">사업자등록번호: </span>${esc(sbiz)}<br><span class="sig-lbl">법인등록번호: </span>${esc(scorp)}</td>
+        <td colspan="2" class="center"><span class="sig-lbl">사업자등록번호: </span>${esc(bbiz)}</td>
       </tr>
     </table>`;
 }
 
-// ── WORD EXPORT ───────────────────────────────────────────────────
-async function exportWord() {
-  const btn = $('wordBtn');
-  btn.textContent = '⏳ 생성 중...';
-  btn.disabled = true;
+// ── WORD 저장 ─────────────────────────────────────────────────────
+async function exportWord(){
+  const btn=$('wBtn');
+  btn.textContent='⏳ 생성 중...';btn.disabled=true;
+  try{
+    // docx 9.x는 window.docx 또는 전역으로 노출됨
+    const lib = window.docx || window;
+    const {Document,Packer,Paragraph,TextRun,Table,TableRow,TableCell,
+           AlignmentType,BorderStyle,WidthType,VerticalAlign,UnderlineType} = lib;
 
-  try {
-    const {
-      Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
-      AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign, UnderlineType
-    } = docx;
+    const F='Malgun Gothic';
+    const bdr=(sz=18)=>({style:BorderStyle.SINGLE,size:sz,color:'000000'});
+    const borders={top:bdr(),bottom:bdr(),left:bdr(),right:bdr()};
 
-    const bdr = { style: BorderStyle.SINGLE, size: 4, color: "888888" };
-    const borders = { top:bdr, bottom:bdr, left:bdr, right:bdr };
-    const hBdr = { style: BorderStyle.SINGLE, size: 4, color: "888888" };
-    const hBorders = { top:hBdr, bottom:hBdr, left:hBdr, right:hBdr };
+    const sn=val('sName'),bn=val('bName'),sa=val('sAddr'),ba=val('bAddr');
+    const sr=val('sRep'),br=val('bRep'),sbiz=val('sBiz'),bbiz=val('bBiz'),scorp=val('sCorp'),am=val('amt');
+    const cno=val('cNo'),cdate=dateKo(val('cDate')),adate=dateKo(val('aDate'));
 
-    const sn=val('sellerName'), bn=val('buyerName');
-    const sa=val('sellerAddr'), ba=val('buyerAddr');
-    const sr=val('sellerRep'),  br=val('buyerRep');
-    const sbiz=val('sellerBiz'), bbiz=val('buyerBiz');
-    const scorp=val('sellerCorp'), amt=val('amount');
-    const cno=val('contractNo'), cdate=dateKo(val('contractDate')), adate=dateKo(val('addendumDate'));
+    const P=(children,opts={})=>new Paragraph({children,spacing:{line:288,lineRule:'auto'},...opts});
+    const T=(text,opts={})=>new TextRun({text:String(text||''),font:F,size:20,...opts});
 
-    const P = (children, opts={}) => new Paragraph({ children, ...opts });
-    const T = (text, opts={}) => new TextRun({ text: String(text||''), ...opts });
-    const F = 'Malgun Gothic';
+    // 구성품 테이블 (원본과 동일 비율: 2033/5000, 2270/5000, 697/5000)
+    // A4 여백 기준 content width: 11900-1418-1418=9064 dxa
+    const TW=9064;
+    const TC1=Math.round(TW*2033/5000);
+    const TC2=Math.round(TW*2270/5000);
+    const TC3=TW-TC1-TC2;
 
-    function makeTable(arr) {
-      const colW = [2200, 5000, 800];
-      const total = colW.reduce((a,b)=>a+b,0);
-      const hdr = new TableRow({ tableHeader: true, children:
-        [["구성품 번호",2200],["구성품",5000],["수량",800]].map(([txt,w]) =>
-          new TableCell({ borders: hBorders, width:{size:w, type:WidthType.DXA},
-            shading:{fill:"EEECE1", type:ShadingType.CLEAR},
-            margins:{top:80,bottom:80,left:120,right:120}, verticalAlign:VerticalAlign.CENTER,
-            children:[P([T(txt,{bold:true,size:20,font:F})], {alignment:AlignmentType.CENTER})]
-          })
-        )
-      });
-      const dataRows = arr.map(r => new TableRow({ children:
-        [[r.no||'',2200,AlignmentType.CENTER],[r.name||'',5000,AlignmentType.LEFT],[String(r.qty),800,AlignmentType.CENTER]]
-        .map(([txt,w,align]) => new TableCell({
-          borders, width:{size:w, type:WidthType.DXA},
-          margins:{top:80,bottom:80,left:120,right:120}, verticalAlign:VerticalAlign.CENTER,
-          children:[P([T(txt,{size:20,font:F})], {alignment:align})]
-        }))
-      }));
-      return new Table({ width:{size:total, type:WidthType.DXA}, columnWidths:colW, rows:[hdr,...dataRows] });
+    function makeItemTable(arr){
+      const hdr=new TableRow({tableHeader:true,children:[
+        new TableCell({borders,width:{size:TC1,type:WidthType.DXA},margins:{top:60,bottom:60,left:80,right:80},
+          children:[P([T('구성품 번호',{bold:true})],{alignment:AlignmentType.CENTER,spacing:{line:288}})]}),
+        new TableCell({borders,width:{size:TC2,type:WidthType.DXA},margins:{top:60,bottom:60,left:80,right:80},
+          children:[P([T('구성품',{bold:true})],{alignment:AlignmentType.CENTER,spacing:{line:288}})]}),
+        new TableCell({borders,width:{size:TC3,type:WidthType.DXA},margins:{top:60,bottom:60,left:80,right:80},
+          children:[P([T('수량',{bold:true})],{alignment:AlignmentType.CENTER,spacing:{line:288}})]}),
+      ]});
+      const dRows=arr.map(r=>new TableRow({children:[
+        new TableCell({borders,width:{size:TC1,type:WidthType.DXA},margins:{top:60,bottom:60,left:80,right:80},
+          children:[P([T(r.no||'')],{spacing:{line:288}})]}),
+        new TableCell({borders,width:{size:TC2,type:WidthType.DXA},margins:{top:60,bottom:60,left:80,right:80},
+          children:[P([T(r.name||'')],{spacing:{line:288}})]}),
+        new TableCell({borders,width:{size:TC3,type:WidthType.DXA},margins:{top:60,bottom:60,left:80,right:80},
+          children:[P([T(String(r.qty))],{alignment:AlignmentType.CENTER,spacing:{line:288}})]}),
+      ]}));
+      return new Table({width:{size:TW,type:WidthType.DXA},columnWidths:[TC1,TC2,TC3],rows:[hdr,...dRows]});
     }
 
-    const sigW = 4500;
-    function sigCell(lines) {
-      return new TableCell({ borders, width:{size:sigW, type:WidthType.DXA},
-        margins:{top:120,bottom:120,left:160,right:160},
-        children: lines.map(runs => P(runs, {spacing:{after:60}}))
-      });
-    }
+    // 서명 테이블 (원본: 9072 dxa, 4컬럼: 1203,3346,1190,3333)
+    const SW=9072,SC1=1203,SC2=3346,SC3=1190,SC4=3333;
+    const thk={style:BorderStyle.SINGLE,size:18,color:'000000'};
+    const thkB={top:thk,bottom:thk,left:thk,right:thk};
+    const tc4=(w,children,span=1,opts={})=>new TableCell({
+      borders:thkB,width:{size:w,type:WidthType.DXA},columnSpan:span,
+      margins:{top:80,bottom:80,left:120,right:120},verticalAlign:VerticalAlign.CENTER,
+      children,...opts
+    });
 
-    const sigTable = new Table({
-      width:{size:9000, type:WidthType.DXA}, columnWidths:[sigW,sigW],
+    const sigTable=new Table({
+      width:{size:SW,type:WidthType.DXA},
+      columnWidths:[SC1,SC2,SC3,SC4],
       rows:[
-        new TableRow({ children:[
-          new TableCell({ borders:hBorders, width:{size:sigW,type:WidthType.DXA},
-            shading:{fill:"EEECE1",type:ShadingType.CLEAR}, margins:{top:100,bottom:100,left:160,right:160},
-            children:[P([T(`회사: ${sn}`,{bold:true,size:21,font:F})], {alignment:AlignmentType.CENTER})]
-          }),
-          new TableCell({ borders:hBorders, width:{size:sigW,type:WidthType.DXA},
-            shading:{fill:"EEECE1",type:ShadingType.CLEAR}, margins:{top:100,bottom:100,left:160,right:160},
-            children:[P([T(`구매자: ${bn}`,{bold:true,size:21,font:F})], {alignment:AlignmentType.CENTER})]
-          }),
+        new TableRow({children:[
+          tc4(SC1+SC2,[P([T(`회사: ${sn}`,{bold:true})],{spacing:{line:288}})],2),
+          tc4(SC3+SC4,[P([T(`구매자: ${bn}`,{bold:true})],{spacing:{line:288}})],2),
         ]}),
-        new TableRow({ children:[
-          sigCell([[T("주 소  ",{size:20,color:"888888",font:F}), T(sa,{size:20,font:F})]]),
-          sigCell([[T("주 소  ",{size:20,color:"888888",font:F}), T(ba,{size:20,font:F})]]),
+        new TableRow({children:[
+          tc4(SC1,[P([T('주     소')],{spacing:{line:288}})]),
+          tc4(SC2,[P([T(sa,{size:19})],{spacing:{line:240}})]),
+          tc4(SC3,[P([T('주     소')],{spacing:{line:288}})]),
+          tc4(SC4,[
+            P([T(ba.split('(04322)')[0].trim(),{size:19})],{spacing:{line:240}}),
+            ba.includes('(04322)')?P([T('(04322)',{size:19})],{spacing:{line:240}}):new Paragraph({}),
+          ]),
         ]}),
-        new TableRow({ children:[
-          sigCell([[T("대표자명  ",{size:20,color:"888888",font:F}), T(`${sr}   (인)`,{size:21,font:F})]]),
-          sigCell([[T("성명/직책  ",{size:20,color:"888888",font:F}), T(`${br||"               "}   (인)`,{size:21,font:F})]]),
+        new TableRow({children:[
+          tc4(SC1,[P([T('대표자명')],{spacing:{line:288}})]),
+          tc4(SC2,[P([T(`${sr}  (인)`)],{alignment:AlignmentType.CENTER,spacing:{line:288}})]),
+          tc4(SC3,[P([T('성명/직책')],{spacing:{line:288}})]),
+          tc4(SC4,[P([T(`${br||'                   '}  (인)`)],{alignment:AlignmentType.CENTER,spacing:{line:288}})]),
         ]}),
-        new TableRow({ children:[
-          new TableCell({ borders, width:{size:sigW,type:WidthType.DXA}, margins:{top:120,bottom:120,left:160,right:160},
-            children:[
-              P([T("사업자등록번호  ",{size:20,color:"888888",font:F}), T(sbiz,{size:20,font:F})], {spacing:{after:60}}),
-              P([T("법인등록번호  ",{size:20,color:"888888",font:F}), T(scorp,{size:20,font:F})]),
-            ]
-          }),
-          new TableCell({ borders, width:{size:sigW,type:WidthType.DXA}, margins:{top:120,bottom:120,left:160,right:160},
-            children:[P([T("사업자등록번호  ",{size:20,color:"888888",font:F}), T(bbiz,{size:20,font:F})])]
-          }),
+        new TableRow({children:[
+          tc4(SC1+SC2,[
+            P([T(`사업자등록번호: ${sbiz}`)],{alignment:AlignmentType.CENTER,spacing:{line:240}}),
+            P([T(`법인등록번호: ${scorp}`)],{alignment:AlignmentType.CENTER,spacing:{line:240}}),
+          ],2),
+          tc4(SC3+SC4,[
+            P([T(`사업자등록번호: ${bbiz}`)],{alignment:AlignmentType.CENTER,spacing:{line:288}}),
+          ],2),
         ]}),
       ]
     });
 
-    const doc = new Document({
-      styles: { default: { document: { run: { font: "Batang", size: 22 } } } },
-      sections: [{
-        properties: { page: { size:{width:11906,height:16838}, margin:{top:1440,right:1200,bottom:1440,left:1200} } },
-        children: [
-          P([T("부속 합의서", {bold:true, size:44, font:"Batang", underline:{type:UnderlineType.SINGLE}})],
-            {alignment:AlignmentType.CENTER, spacing:{after:400},
-             border:{bottom:{style:BorderStyle.SINGLE,size:10,color:"1a1a1a",space:8}}}),
-          P([], {spacing:{after:120}}),
-          P([T("구매계약서 번호 :  ",{size:22,font:F}), T(cno,{size:22,underline:{type:UnderlineType.SINGLE},font:F})], {spacing:{after:80}}),
-          P([T("구매계약서 체결일자 :  ",{size:22,font:F}), T(cdate,{size:22,underline:{type:UnderlineType.SINGLE},font:F})], {spacing:{after:80}}),
-          P([T("부속 합의 일자 :  ",{size:22,font:F}), T(adate,{size:22,underline:{type:UnderlineType.SINGLE},font:F})], {spacing:{after:320}}),
-          P([T("위 합의된 구매계약서의 구성품 중 일부가 아래와 같이 변경되어 이에 대하여 다음과 같이 합의합니다.",{size:22,font:F})], {spacing:{after:320}}),
-          P([T("1.  변경 대상 구성품",{bold:true,size:23,font:F})], {spacing:{after:160}}),
-          makeTable(beforeItems),
-          P([], {spacing:{after:240}}),
-          P([T("변경 후 구성품",{bold:true,size:23,font:F})], {spacing:{after:160}}),
-          makeTable(afterItems),
-          P([], {spacing:{after:320}}),
-          P([
-            T("2.  변경 후 최종 계약 금액 : ",{bold:true,size:24,font:F}),
-            T(amt,{bold:true,size:24,underline:{type:UnderlineType.SINGLE},font:F}),
-            T("원(VAT포함)",{bold:true,size:24,font:F}),
-          ], {spacing:{after:360}}),
-          P([T("본 부속합의서에 명시된 해당 구성품 변경 외의 구매계약서 상의 다른 조건은 여전히 유효하며 양 당사자에게 구속력을 갖습니다. 각 당사자의 적법하게 수권 받은 대표는 본 부속 합의서 2부를 체결하여 각 당사자가 한 부씩 보관하며, 직인이 날인된 순간부터 해당 부속 합의서의 효력이 발휘됩니다.",{size:21,font:F})], {spacing:{after:400}}),
+    const doc=new Document({
+      numbering:{config:[{
+        reference:'nums',levels:[{
+          level:0,format:'decimal',text:'%1.',alignment:AlignmentType.LEFT,
+          style:{paragraph:{indent:{left:480,hanging:480},spacing:{line:288,lineRule:'auto'}},
+                run:{bold:true,font:F,size:20}}
+        }]
+      }]},
+      sections:[{
+        properties:{page:{size:{width:11900,height:16840},margin:{top:1361,right:1418,bottom:1134,left:1418}}},
+        children:[
+          // 제목
+          new Paragraph({
+            children:[new TextRun({text:'부속 합의서',font:'Malgun Gothic Semilight',size:36,bold:true,underline:{type:UnderlineType.SINGLE}})],
+            alignment:AlignmentType.CENTER,spacing:{line:288,after:200}
+          }),
+          P([],{spacing:{line:240,after:0}}),
+          // 메타
+          P([T('구매계약서 번호 '),T('\t'),T(': '),T(cno,{underline:{type:UnderlineType.SINGLE}})],{spacing:{line:240}}),
+          P([T('구매계약서 체결일자'),T('\t'),T(': '),T(cdate,{underline:{type:UnderlineType.SINGLE}})],{spacing:{line:240}}),
+          P([T('부속 합의 일자 '),T('\t\t'),T(': '),T(adate,{underline:{type:UnderlineType.SINGLE}})],{spacing:{line:240}}),
+          P([],{spacing:{line:240}}),
+          // 도입
+          P([T('위 합의된 구매계약서의 구성품 중 일부가 아래와 같이 변경되어 이에 대하여 다음과 같이 합의합니다.')],{spacing:{line:240}}),
+          // 섹션1
+          new Paragraph({children:[T('변경 대상 구성품',{bold:true})],spacing:{line:288,before:160},numbering:{reference:'nums',level:0}}),
+          makeItemTable(bItems),
+          P([T('변경 후 구성품',{bold:true})],{spacing:{line:288,before:160},indent:{firstLine:800}}),
+          makeItemTable(aItems),
+          // 섹션2
+          new Paragraph({
+            children:[T('변경 후 최종 계약 금액 : ',{bold:true}),T(am,{bold:true,underline:{type:UnderlineType.SINGLE}}),T('원(VAT포함)',{bold:true})],
+            spacing:{line:288,before:160},numbering:{reference:'nums',level:0}
+          }),
+          P([],{spacing:{line:288}}),
+          // 클로징
+          P([T('본 부속합의서에 명시된 해당 구성품 변경 외의 구매계약서 상의 다른 조건은 여전히 유효하며 양 당사자에게 구속력을 갖습니다. 각 당사자의 적법하게 수권 받은 대표는 본 부속 합의서 2부를 체결하여 각 당사자가 한 부씩 보관하며, 직인이 날인된 순간부터 해당 부속 합의서의 효력이 발휘됩니다.')],{spacing:{line:240}}),
+          P([],{spacing:{line:240}}),
           sigTable,
         ]
       }]
     });
 
-    const buffer = await Packer.toBuffer(doc);
-    const blob = new Blob([buffer], {type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    const buyerShort = val('buyerName').replace(/[㈜()]/g,'').trim().slice(0,6);
-    const dateStr = val('addendumDate').replace(/-/g,'');
-    a.download = `부속합의서_${buyerShort}_${dateStr}.docx`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const buf=await Packer.toBuffer(doc);
+    const blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;
+    const buyShort=val('bName').replace(/[㈜()]/g,'').trim().slice(0,6);
+    const ds=val('aDate').replace(/-/g,'');
+    a.download=`부속합의서_${buyShort}_${ds}.docx`;
+    a.click();URL.revokeObjectURL(url);
     toast('✓ Word 파일이 저장되었습니다');
-  } catch(e) {
+  }catch(e){
     console.error(e);
-    toast('⚠️ 저장 실패: ' + e.message, false);
-  } finally {
-    btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Word로 저장`;
-    btn.disabled = false;
+    toast('⚠ 오류: '+e.message,false);
+  }finally{
+    btn.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>Word로 저장';
+    btn.disabled=false;
   }
 }
 
 // ── 초기화 ────────────────────────────────────────────────────────
-setBuyer('inomed'); // 이노메드 기본값 (chip click 없이)
-document.querySelectorAll('.buyer-chip')[0].classList.add('active');
-renderRows(beforeItems, 'beforeRows');
-renderRows(afterItems, 'afterRows');
-render();
+(function init(){
+  // 이노메드 기본값
+  const d=BUYERS.inomed;
+  set('bName',d.name);set('bAddr',d.addr);set('bRep',d.rep);set('bBiz',d.biz);
+  renderRows(bItems,'bRows',NUMS_BEFORE,NAMES_BEFORE);
+  renderRows(aItems,'aRows',NUMS_AFTER,NAMES_AFTER);
+  render();
+})();
 </script>
 </body>
 </html>
