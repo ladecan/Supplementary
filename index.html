@@ -88,6 +88,8 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
 .toast.show{transform:translateY(0);opacity:1}
 @media print{header,.form-panel,.pbar{display:none!important}.layout{display:block!important}.prev-scroll{padding:0!important}.doc{box-shadow:none!important;width:100%!important;padding:15mm 18mm!important}}
 </style>
+<!-- 다음 주소검색 API (인터넷 연결 시 사용 가능) -->
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
 <header>
@@ -146,8 +148,15 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
       <button class="chip" onclick="setBuyer('custom',this)">직접 입력</button>
     </div>
     <div class="f"><label>회사 / 병원명 <span class="req">*</span></label><input type="text" id="bName" oninput="markCustom();render()"></div>
-    <div class="f"><label>주소 1줄</label><input type="text" id="bAddr1" oninput="render()"></div>
-    <div class="f"><label>주소 2줄</label><input type="text" id="bAddr2" oninput="render()"></div>
+    <div class="f">
+      <label>주소</label>
+      <div style="display:flex;gap:6px;margin-bottom:5px">
+        <input type="text" id="bAddr1" placeholder="도로명 주소" oninput="render()" style="flex:1">
+        <button onclick="searchAddr()" style="padding:6px 12px;background:var(--navy);color:#fff;border:none;border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">🔍 주소검색</button>
+      </div>
+      <input type="text" id="bAddr2" placeholder="상세주소 (동·호수 등)" oninput="render()">
+      <div id="addrPostcode" style="font-size:10px;color:var(--tx3);margin-top:3px"></div>
+    </div>
     <div class="row2">
       <div class="f"><label>성명 / 직책</label><input type="text" id="bRep" oninput="render()"></div>
       <div class="f"><label>사업자등록번호</label><input type="text" id="bBiz" oninput="fmtBiz(this);render()" maxlength="12" placeholder="000-00-00000"></div>
@@ -205,6 +214,36 @@ const val=id=>$(id).value.trim();
 const set=(id,v)=>{$(id).value=v};
 const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 function fmtAmt(el){const n=el.value.replace(/[^0-9]/g,"");el.value=n?parseInt(n).toLocaleString("ko-KR"):"";}
+function searchAddr() {
+  // 다음 주소 API가 로드됐는지 확인
+  if (typeof daum === "undefined" || !daum.Postcode) {
+    toast("주소검색은 인터넷 연결이 필요합니다", false);
+    return;
+  }
+  new daum.Postcode({
+    oncomplete: function(data) {
+      // 도로명 주소 우선, 없으면 지번
+      const addr1 = data.roadAddress || data.jibunAddress;
+      // 우편번호 표시
+      document.getElementById("addrPostcode").textContent = "(" + data.zonecode + ")";
+      // 주소 1줄에 설정
+      document.getElementById("bAddr1").value = addr1 + " (" + data.zonecode + ")";
+      // 상세주소 칸 비우고 포커스
+      document.getElementById("bAddr2").value = "";
+      document.getElementById("bAddr2").focus();
+      // 구매자 칩을 직접입력으로 전환
+      markCustom();
+      render();
+    },
+    theme: {
+      bgColor: "#1e3a5f",
+      titleColor: "#ffffff",
+      searchBgColor: "#2c4e7a",
+      queryTextColor: "#ffffff",
+    }
+  }).open();
+}
+
 function fmtBiz(el){
   const n=el.value.replace(/[^0-9]/g,"");
   if(n.length<=3) el.value=n;
