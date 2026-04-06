@@ -387,9 +387,17 @@ async function exportWord() {
       xml = replaceInXml(xml, ">2<", ">" + aIt[0].qty + "<", 1);
     }
 
-    // 8. 구매자명 (이노메드 → 새 이름)
-    const buyerNameOnly = val("bName").replace("㈜","").trim();
-    xml = replaceInXml(xml, "이노메드", buyerNameOnly, 1);
+    // 8. 구매자명 치환
+    // 원본 XML: <w:t>㈜</w:t> ... <w:t>이노메드</w:t> 별도 run
+    const bNameFull = val("bName").trim();
+    const hasKakho = bNameFull.startsWith("㈜") || bNameFull.startsWith("(주)");
+    const bNameBody = bNameFull.replace(/^[㈜(주)]+/, "").trim();
+    // ㈜ run: 입력값에 ㈜ 없으면 비움, 있으면 ㈜ 유지
+    if (!hasKakho) {
+      xml = replaceInXml(xml, "㈜", "", 1);
+    }
+    // 이노메드 run을 나머지 이름으로 교체
+    xml = replaceInXml(xml, "이노메드", bNameBody || bNameFull, 1);
 
     // 9. 구매자 주소 (두 줄)
     const newAddr1 = val("bAddr1");
