@@ -150,12 +150,11 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     <div class="f"><label>회사 / 병원명 <span class="req">*</span></label><input type="text" id="bName" oninput="markCustom();render()"></div>
     <div class="f">
       <label>주소</label>
-      <div style="display:flex;gap:6px;margin-bottom:5px">
-        <input type="text" id="bAddr1" placeholder="도로명 주소" oninput="render()" style="flex:1">
+      <div style="display:flex;gap:6px">
+        <input type="text" id="bAddr1" placeholder="주소 (도로명 또는 지번)" oninput="render()" style="flex:1">
         <button onclick="searchAddr()" style="padding:6px 12px;background:var(--navy);color:#fff;border:none;border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">🔍 주소검색</button>
       </div>
-      <input type="text" id="bAddr2" placeholder="상세주소 (동·호수 등)" oninput="render()">
-      <div id="addrPostcode" style="font-size:10px;color:var(--tx3);margin-top:3px"></div>
+      <input type="hidden" id="bAddr2" value="">
     </div>
     <div class="row2">
       <div class="f"><label>성명 / 직책</label><input type="text" id="bRep" oninput="render()"></div>
@@ -202,8 +201,8 @@ const NAMES_A=["GMPP DCD Small","GMPP DCD Medium","GMPP DCD Large","GMPP ACC Lar
 const NO2N={"7123-CE-0650":"GMPP DCD Small","7123-CE-0632":"GMPP DCD Medium","7123-CE-0652":"GMPP DCD Large","7123-CE-0653":"GMPP ACC Large","FIN100834":"Zimmer Cryo7","FIN101958":"GMPP Modified LSDS Options Kit for DCD","FIN101959":"GMPP Modified LSDS Options Kit for ACC"};
 const N2NO=Object.fromEntries(Object.entries(NO2N).map(([k,v])=>[v,k]));
 const BUYERS={
-  inomed:{name:"㈜이노메드",addr1:"서울시 용산구 한강대로 257 ",addr2:"2층,4층(갈월동,청룡빌딩) (04322)",rep:"변승환",biz:"106-81-97189"},
-  sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111,",addr2:"부산지식산업센터 102 호(46508)",rep:"이호재",biz:"551-88-01183"}
+  inomed:{name:"㈜이노메드",addr1:"서울시 용산구 한강대로 257 2층,4층(갈월동,청룡빌딩) (04322)",addr2:"",rep:"변승환",biz:"106-81-97189"},
+  sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111, 부산지식산업센터 102 호(46508)",addr2:"",rep:"이호재",biz:"551-88-01183"}
 };
 
 let bIt=[{no:"7123-CE-0650",name:"GMPP DCD Small",qty:1},{no:"7123-CE-0632",name:"GMPP DCD Medium",qty:1},{no:"7123-CE-0653",name:"GMPP ACC Large",qty:1}];
@@ -224,13 +223,9 @@ function searchAddr() {
     oncomplete: function(data) {
       // 도로명 주소 우선, 없으면 지번
       const addr1 = data.roadAddress || data.jibunAddress;
-      // 우편번호 표시
-      document.getElementById("addrPostcode").textContent = "(" + data.zonecode + ")";
-      // 주소 1줄에 설정
+      // 전체 주소 (우편번호 포함) 한 줄로
       document.getElementById("bAddr1").value = addr1 + " (" + data.zonecode + ")";
-      // 상세주소 칸 비우고 포커스
       document.getElementById("bAddr2").value = "";
-      document.getElementById("bAddr2").focus();
       // 구매자 칩을 직접입력으로 전환
       markCustom();
       render();
@@ -294,7 +289,7 @@ function addRow(t){if(t==="b"){bIt.push({no:"",name:"",qty:1});renderRows(bIt,"b
 function tblH(arr){const rows=arr.map(r=>`<tr><td class="c">${esc(r.no)}</td><td>${esc(r.name)}</td><td class="c">${r.qty}</td></tr>`).join("");return`<table class="doc-tbl"><thead><tr><th style="width:150px">구성품 번호</th><th>구성품</th><th style="width:55px">수량</th></tr></thead><tbody>${rows}</tbody></table>`;}
 
 function render(){
-  const sn=val("sName"),bn=val("bName"),sa=val("sAddr"),ba1=val("bAddr1"),ba2=val("bAddr2"),sr=val("sRep"),br=val("bRep"),sbiz=val("sBiz"),bbiz=val("bBiz"),scorp=val("sCorp"),am=val("amt");
+  const sn=val("sName"),bn=val("bName"),sa=val("sAddr"),ba1=val("bAddr1"),sr=val("sRep"),br=val("bRep"),sbiz=val("sBiz"),bbiz=val("bBiz"),scorp=val("sCorp"),am=val("amt");
   $("doc").innerHTML=`<div class="doc-wm">CANDELA KOREA</div>
 <div class="doc-title">부속 합의서</div>
 <div class="doc-meta">
@@ -312,7 +307,7 @@ ${tblH(aIt)}
 <div class="doc-closing">본 부속합의서에 명시된 해당 구성품 변경 외의 구매계약서 상의 다른 조건은 여전히 유효하며 양 당사자에게 구속력을 갖습니다. 각 당사자의 적법하게 수권 받은 대표는 본 부속 합의서 2부를 체결하여 각 당사자가 한 부씩 보관하며, 직인이 날인된 순간부터 해당 부속 합의서의 효력이 발휘됩니다.</div>
 <table class="sig-tbl">
   <tr><td colspan="2" class="hd">회사: ${esc(sn)}</td><td colspan="2" class="hd">구매자: ${esc(bn)}</td></tr>
-  <tr><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td style="width:230px">${esc(sa)}</td><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td>${esc(ba1)}${ba2?"<br>"+esc(ba2):""}</td></tr>
+  <tr><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td style="width:230px">${esc(sa)}</td><td style="width:88px"><span class="sig-lbl">주&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;소</span></td><td>${esc(ba1)}</td></tr>
   <tr><td><span class="sig-lbl">대표자명</span></td><td style="text-align:center">${esc(sr)}&nbsp;&nbsp;(인)</td><td><span class="sig-lbl">성명/직책</span></td><td style="text-align:center">${br?esc(br)+"&nbsp;&nbsp;(인)":"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(인)"}</td></tr>
   <tr><td colspan="2" style="text-align:center"><span class="sig-lbl">사업자등록번호: </span>${esc(sbiz)}<br><span class="sig-lbl">법인등록번호: </span>${esc(scorp)}</td><td colspan="2" style="text-align:center"><span class="sig-lbl">사업자등록번호: </span>${esc(bbiz)}</td></tr>
 </table>`;
@@ -498,11 +493,10 @@ async function exportWord() {
     // 이노메드 run을 나머지 이름으로 교체
     xml = replaceInXml(xml, "이노메드", bNameBody || bNameFull, 1);
 
-    // 9. 구매자 주소 (두 줄)
+    // 9. 구매자 주소 (한 줄로 통합 — 원본 첫 번째 문단에 전체 주소, 두 번째 문단은 비움)
     const newAddr1 = val("bAddr1");
-    const newAddr2 = val("bAddr2");
-    if (newAddr1) xml = xml.replace("서울시 용산구 한강대로 257 ", newAddr1 + " ");
-    xml = xml.replace("2층,4층(갈월동,청룡빌딩) (04322)", newAddr2 || "");
+    xml = xml.replace("서울시 용산구 한강대로 257 ", (newAddr1 || "서울시 용산구 한강대로 257 ") + " ");
+    xml = xml.replace("2층,4층(갈월동,청룡빌딩) (04322)", "");
 
     // 10. 구매자 사업자번호
     xml = replaceInXml(xml, "106-81-97189", val("bBiz") || "106-81-97189", 1);
