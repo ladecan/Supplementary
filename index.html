@@ -134,7 +134,7 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     <div class="f"><label>주소</label><input type="text" id="sAddr" value="서울시 서초구 강남대로 327 대륭서초타워 3층 (우: 06627)" oninput="render()"></div>
     <div class="row2">
       <div class="f"><label>대표자명</label><input type="text" id="sRep" value="유지쿠리키" oninput="render()"></div>
-      <div class="f"><label>사업자등록번호</label><input type="text" id="sBiz" value="729-87-01057" oninput="render()"></div>
+      <div class="f"><label>사업자등록번호</label><input type="text" id="sBiz" value="729-87-01057" oninput="fmtBiz(this);render()" maxlength="12"></div>
     </div>
     <div class="f"><label>법인등록번호</label><input type="text" id="sCorp" value="110114-0225232" oninput="render()"></div>
   </div>
@@ -150,7 +150,7 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     <div class="f"><label>주소 2줄</label><input type="text" id="bAddr2" oninput="render()"></div>
     <div class="row2">
       <div class="f"><label>성명 / 직책</label><input type="text" id="bRep" oninput="render()"></div>
-      <div class="f"><label>사업자등록번호</label><input type="text" id="bBiz" oninput="render()"></div>
+      <div class="f"><label>사업자등록번호</label><input type="text" id="bBiz" oninput="fmtBiz(this);render()" maxlength="12" placeholder="000-00-00000"></div>
     </div>
   </div>
 </div>
@@ -204,6 +204,12 @@ const val=id=>$(id).value.trim();
 const set=(id,v)=>{$(id).value=v};
 const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 function fmtAmt(el){const n=el.value.replace(/[^0-9]/g,"");el.value=n?parseInt(n).toLocaleString("ko-KR"):"";}
+function fmtBiz(el){
+  const n=el.value.replace(/[^0-9]/g,"");
+  if(n.length<=3) el.value=n;
+  else if(n.length<=5) el.value=n.slice(0,3)+"-"+n.slice(3);
+  else el.value=n.slice(0,3)+"-"+n.slice(3,5)+"-"+n.slice(5,10);
+}
 function dateKo(s){if(!s)return"";const[y,m,d]=s.split("-");return`${y}년 ${+m}월 ${+d}일`;}
 function toast(msg,ok=true){const t=$("toast");t.textContent=msg;t.style.background=ok?"#1e3a5f":"#8b2030";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2800);}
 
@@ -286,6 +292,17 @@ function replaceInXml(xml, oldText, newText, count=1) {
   return result;
 }
 
+// ── 행 삭제 헬퍼 (paraId로 w:tr 전체 제거) ──────────────────────
+function deleteRow(xml, paraId) {
+  const marker = `w14:paraId="${paraId}"`;
+  const idx = xml.indexOf(marker);
+  if (idx === -1) return xml;
+  const trStart = xml.lastIndexOf('<w:tr ', idx);
+  const trEnd = xml.indexOf('</w:tr>', trStart) + 7;
+  if (trStart === -1 || trEnd < 7) return xml;
+  return xml.slice(0, trStart) + xml.slice(trEnd);
+}
+
 // ── SDT 드롭다운 현재값 치환 ──────────────────────────────────────
 function replaceSdtValue(xml, sdtIndex, newValue) {
   // w:sdt 블록을 순서대로 찾아서 sdtContent 내 w:t를 교체
@@ -364,6 +381,8 @@ async function exportWord() {
     xml = replaceInXml(xml, "150,000,000", val("amt"), 1);
 
     // 6. 변경 전 구성품 (SDT 0~5: 번호0 이름0 번호1 이름1 번호2 이름2)
+    // 사용하는 행만 SDT 교체, 나머지 행은 삭제
+    const bLen = bIt.length;
     for (let i = 0; i < 3; i++) {
       const item = bIt[i] || {no:"",name:"",qty:1};
       xml = replaceSdtValue(xml, i*2,   item.no);
@@ -379,6 +398,11 @@ async function exportWord() {
       }
       return m;
     });
+    // 불필요한 행 삭제 (paraId 기준)
+    // row2: paraId=15333852, row3: paraId=17FDAA9F
+    if (bLen <= 2) xml = deleteRow(xml, "15333852"); // 3번째 행 삭제
+    if (bLen <= 1) xml = deleteRow(xml, "17FDAA9F"); // 2번째 행 삭제 (실제로는 원래 row2)
+    // ※ bLen=1: 두 행 모두 삭제, bLen=2: row3만 삭제, bLen=3: 유지
 
     // 7. 변경 후 구성품 (SDT 6,7)
     if (aIt[0]) {
