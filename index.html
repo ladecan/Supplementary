@@ -303,6 +303,18 @@ function deleteRow(xml, paraId) {
   return xml.slice(0, trStart) + xml.slice(trEnd);
 }
 
+// ── 특정 행 내에서 문자열 교체 ────────────────────────────────────
+function replaceInRow(xml, paraId, oldStr, newStr) {
+  const marker = `w14:paraId="${paraId}"`;
+  const idx = xml.indexOf(marker);
+  if (idx === -1) return xml;
+  const trStart = xml.lastIndexOf('<w:tr ', idx);
+  const trEnd = xml.indexOf('</w:tr>', trStart) + 7;
+  const row = xml.slice(trStart, trEnd);
+  const newRow = row.replace(oldStr, newStr);
+  return xml.slice(0, trStart) + newRow + xml.slice(trEnd);
+}
+
 // ── SDT 드롭다운 현재값 치환 ──────────────────────────────────────
 function replaceSdtValue(xml, sdtIndex, newValue) {
   // w:sdt 블록을 순서대로 찾아서 sdtContent 내 w:t를 교체
@@ -380,15 +392,23 @@ async function exportWord() {
     // 5. 금액
     xml = replaceInXml(xml, "150,000,000", val("amt"), 1);
 
-    // 6. 변경 전 구성품 (SDT 0~5: 번호0 이름0 번호1 이름1 번호2 이름2)
-    // 사용하는 행만 SDT 교체, 나머지 행은 삭제
+    // 6+7. 모든 SDT 교체를 먼저 처리 (행 삭제 전에 해야 인덱스가 맞음)
+    // 변경 전 구성품 (SDT 0~5)
     const bLen = bIt.length;
     for (let i = 0; i < 3; i++) {
       const item = bIt[i] || {no:"",name:"",qty:1};
       xml = replaceSdtValue(xml, i*2,   item.no);
       xml = replaceSdtValue(xml, i*2+1, item.name);
     }
-    // 수량 1,1,1 치환 (순서대로)
+    // 변경 후 구성품 (SDT 6,7) — 행 삭제 전에 교체
+    if (aIt[0]) {
+      xml = replaceSdtValue(xml, 6, aIt[0].no);
+      xml = replaceSdtValue(xml, 7, aIt[0].name);
+    }
+
+    // 변경 전 수량 1,1,1 치환 (paraId=49B8A414가 row1 시작, 각 수량 셀은 마지막 <w:t>숫자</w:t>)
+    // 수량 셀은 SDT 밖 마지막 <w:tc>에 있는 <w:t>숫자</w:t>
+    // 간단 방법: 변경전 테이블 전체에서 순서대로 <w:t>숫자</w:t> 교체
     let qCount = 0;
     xml = xml.replace(/<w:t>(\d+)<\/w:t>/g, (m, d) => {
       if (d === "1" && qCount < 3) {
@@ -398,18 +418,15 @@ async function exportWord() {
       }
       return m;
     });
-    // 불필요한 행 삭제 (paraId 기준)
-    // row2: paraId=15333852, row3: paraId=17FDAA9F
-    if (bLen <= 2) xml = deleteRow(xml, "15333852"); // 3번째 행 삭제
-    if (bLen <= 1) xml = deleteRow(xml, "17FDAA9F"); // 2번째 행 삭제 (실제로는 원래 row2)
-    // ※ bLen=1: 두 행 모두 삭제, bLen=2: row3만 삭제, bLen=3: 유지
 
-    // 7. 변경 후 구성품 (SDT 6,7)
+    // 변경 후 수량: row5 paraId=3E0A94CA 행 내부의 <w:t>2</w:t> 교체
     if (aIt[0]) {
-      xml = replaceSdtValue(xml, 6, aIt[0].no);
-      xml = replaceSdtValue(xml, 7, aIt[0].name);
-      xml = replaceInXml(xml, ">2<", ">" + aIt[0].qty + "<", 1);
+      xml = replaceInRow(xml, "3E0A94CA", "<w:t>2</w:t>", `<w:t>${aIt[0].qty}</w:t>`);
     }
+
+    // 변경 전 불필요한 행 삭제
+    if (bLen <= 2) xml = deleteRow(xml, "15333852");
+    if (bLen <= 1) xml = deleteRow(xml, "17FDAA9F");
 
     // 8. 구매자명 치환
     // 원본 XML: <w:t>㈜</w:t> ... <w:t>이노메드</w:t> 별도 run
