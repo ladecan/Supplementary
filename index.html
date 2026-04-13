@@ -108,10 +108,10 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
 <div class="form-scroll">
   <div class="sec">
     <div class="sec-hd">기본 정보</div>
-    <div class="f"><label>구매계약서 번호 <span class="req">*</span></label><input type="text" id="cNo" value="20241206001" oninput="render()"></div>
+    <div class="f"><label>구매계약서 번호 <span class="req">*</span></label><input type="text" id="cNo" value="" oninput="render()"></div>
     <div class="row2">
-      <div class="f"><label>계약서 체결일자</label><input type="date" id="cDate" value="2024-12-06" onchange="render()"></div>
-      <div class="f"><label>부속합의 일자</label><input type="date" id="aDate" value="2026-03-25" onchange="render()"></div>
+      <div class="f"><label>계약서 체결일자</label><input type="date" id="cDate" value="" onchange="render()"></div>
+      <div class="f"><label>부속합의 일자</label><input type="date" id="aDate" value="" onchange="render()"></div>
     </div>
   </div>
   <div class="sec">
@@ -128,7 +128,7 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
   </div>
   <div class="sec">
     <div class="sec-hd">최종 계약금액</div>
-    <div class="f"><label>변경 후 금액 (VAT 포함) <span class="req">*</span></label><input type="text" id="amt" value="150,000,000" oninput="fmtAmt(this);render()"></div>
+    <div class="f"><label>변경 후 금액 (VAT 포함) <span class="req">*</span></label><input type="text" id="amt" value="" oninput="fmtAmt(this);render()"></div>
   </div>
   <div class="sec">
     <div class="sec-hd">판매자 (Candela Korea)</div>
@@ -205,8 +205,8 @@ const BUYERS={
   sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111, 부산지식산업센터 102 호(46508)",addr2:"",rep:"이호재",biz:"551-88-01183"}
 };
 
-let bIt=[{no:"7123-CE-0650",name:"GMPP DCD Small",qty:1},{no:"7123-CE-0632",name:"GMPP DCD Medium",qty:1},{no:"7123-CE-0653",name:"GMPP ACC Large",qty:1}];
-let aIt=[{no:"FIN101958",name:"GMPP Modified LSDS Options Kit for DCD",qty:2}];
+let bIt=[];
+let aIt=[];
 
 const $=id=>document.getElementById(id);
 const val=id=>$(id).value.trim();
@@ -541,7 +541,8 @@ async function exportWord() {
 
 // ── 초기화 ────────────────────────────────────────────────────────
 (function(){
-  const d=BUYERS.inomed;set("bName",d.name);set("bAddr1",d.addr1||d.addr||"");set("bAddr2",d.addr2||"");set("bRep",d.rep);set("bBiz",d.biz);
+  // 초기 상태: 모든 칩 비활성, 구매자 빈칸
+  document.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
   renderRows(bIt,"bRows",NUMS_B,NAMES_B);
   renderRows(aIt,"aRows",NUMS_A,NAMES_A);
   render();
