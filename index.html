@@ -477,9 +477,10 @@ async function exportWord() {
 
     // (변경 후 수량은 위에서 처리됨)
 
-    // 변경 전 불필요한 행 삭제
-    if (bLen <= 2) xml = deleteRow(xml, "15333852");
-    if (bLen <= 1) xml = deleteRow(xml, "17FDAA9F");
+    // 변경 전 불필요한 행 삭제 (뒤에서부터 삭제해야 인덱스 안 꼬임)
+    // row3(17FDAA9F)=3번째행, row2(15333852)=2번째행
+    if (bLen <= 2) xml = deleteRow(xml, "17FDAA9F"); // 3번째 행 삭제
+    if (bLen <= 1) xml = deleteRow(xml, "15333852"); // 2번째 행도 삭제
 
     // 8. 구매자명 치환
     // 원본 XML: <w:t>㈜</w:t> ... <w:t>이노메드</w:t> 별도 run
