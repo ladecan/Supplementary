@@ -346,7 +346,7 @@ function renderRows(arr,cid,NL,NameL){
   });
 }
 
-function addRow(t){if(t==="b"){bIt.push({no:"",name:"",qty:1});renderRows(bIt,"bRows",NUMS_B,NAMES_B);}else{aIt.push({no:"",name:"",qty:1});renderRows(aIt,"aRows",NUMS_A,NAMES_A);}render();}
+function addRow(t){if(t==="b"){bIt.push({no:"",name:"",qty:1});renderRows(bIt,"bRows",NUMS_A,NAMES_A);}else{aIt.push({no:"",name:"",qty:1});renderRows(aIt,"aRows",NUMS_A,NAMES_A);}render();}
 
 function tblH(arr){const rows=arr.map(r=>`<tr><td class="c">${esc(r.no)}</td><td>${esc(r.name)}</td><td class="c">${r.qty}</td></tr>`).join("");return`<table class="doc-tbl"><thead><tr><th style="width:150px">구성품 번호</th><th>구성품</th><th style="width:55px">수량</th></tr></thead><tbody>${rows}</tbody></table>`;}
 
@@ -618,7 +618,7 @@ async function exportWord() {
 (function(){
   // 초기 상태: 모든 칩 비활성, 구매자 빈칸
   document.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
-  renderRows(bIt,"bRows",NUMS_B,NAMES_B);
+  renderRows(bIt,"bRows",NUMS_A,NAMES_A);
   renderRows(aIt,"aRows",NUMS_A,NAMES_A);
   render();
 })();
