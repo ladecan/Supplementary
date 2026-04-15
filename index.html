@@ -134,7 +134,7 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     <div class="f"><label>구매계약서 번호 <span class="req">*</span></label><input type="text" id="cNo" value="" oninput="render()"></div>
     <div class="row2">
       <div class="f"><label>계약서 체결일자</label><input type="date" id="cDate" value="" onchange="render()"></div>
-      <div class="f"><label>부속합의 일자</label><input type="date" id="aDate" value="" onchange="render()"></div>
+      <div class="f"><label>부속합의 일자</label><input type="date" id="aDate" value="" onchange="onADateChange()"></div>
     </div>
   </div>
   <div class="sec">
@@ -349,6 +349,19 @@ function renderRows(arr,cid,NL,NameL){
 function addRow(t){if(t==="b"){bIt.push({no:"",name:"",qty:1});renderRows(bIt,"bRows",NUMS_A,NAMES_A);}else{aIt.push({no:"",name:"",qty:1});renderRows(aIt,"aRows",NUMS_A,NAMES_A);}render();}
 
 function tblH(arr){const rows=arr.map(r=>`<tr><td class="c">${esc(r.no)}</td><td>${esc(r.name)}</td><td class="c">${r.qty}</td></tr>`).join("");return`<table class="doc-tbl"><thead><tr><th style="width:150px">구성품 번호</th><th>구성품</th><th style="width:55px">수량</th></tr></thead><tbody>${rows}</tbody></table>`;}
+
+function onADateChange(){
+  const d = document.getElementById("aDate").value; // "2026-04-02"
+  if(d){
+    const compact = d.replace(/-/g,""); // "20260402"
+    const cNo = document.getElementById("cNo");
+    // 비어있거나 이전 날짜 패턴(숫자8자리로 시작)이면 덮어씀
+    if(!cNo.value || /^\d{8}/.test(cNo.value)){
+      cNo.value = compact;
+    }
+  }
+  render();
+}
 
 function render(){
   const sn=val("sName"),bn=val("bName"),sa=val("sAddr"),ba1=val("bAddr1"),sr=val("sRep"),br=val("bRep"),sbiz=val("sBiz"),bbiz=val("bBiz"),scorp=val("sCorp"),am=val("amt");
@@ -577,20 +590,39 @@ async function exportWord() {
     // 10. 구매자 사업자번호
     xml = replaceInXml(xml, "106-81-97189", val("bBiz") || "106-81-97189", 1);
 
-    // 11. 구매자 성명 — 공백 run들을 이름으로 교체
-    // 원본 셀: [' ']['   ']['              '][' ']['     (']['인'][') ']
-    // 이 패턴은 문서에서 이 위치에만 존재하므로 단순 문자열 치환으로 처리
-    const repName = val("bRep") || "";
-    // run1(' ') → 이름으로, run2('   ') → 빈칸, run3('              ') → 빈칸, run4(' ') → 빈칸
-    xml = xml
-      .replace('xml:space="preserve"> </w:t></w:r><w:r w:rsidR="00E24BF4">', 
-               `xml:space="preserve">         ${repName}</w:t></w:r><w:r w:rsidR="00E24BF4">`)
-      .replace('xml:space="preserve">   </w:t>',
-               'xml:space="preserve"></w:t>')
-      .replace(
-        'xml:space="preserve">              </w:t></w:r><w:r w:rsidRPr="008A09BA"><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr><w:t xml:space="preserve"> </w:t>',
-        'xml:space="preserve"></w:t></w:r><w:r w:rsidRPr="008A09BA"><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr><w:t xml:space="preserve"></w:t>'
-      );
+    // 11. 구매자 성명 — paraId 53F092EF 전체를 새 문단으로 교체
+    // 원본 run 구조: [' ']['   ']['              '][' ']['     (']['인'][') ']['  ']
+    // → 이름 + '     (인) ' 만 남기도록 새 XML로 통째 교체
+    {
+      const repName = val("bRep") || "";
+      const PARA_ID = "53F092EF";
+      const marker = `w14:paraId="${PARA_ID}"`;
+      const pIdx = xml.indexOf(marker);
+      if(pIdx !== -1) {
+        const pStart = xml.lastIndexOf('<w:p ', pIdx);
+        const pEnd   = xml.indexOf('</w:p>', pStart) + 6;
+        // 원본 pPr 부분 (스타일) 보존하고 run만 새로 씀
+        const oldPara = xml.slice(pStart, pEnd);
+        const pPrMatch = oldPara.match(/<w:pPr>.*?<\/w:pPr>/s);
+        const pPr = pPrMatch ? pPrMatch[0] : "";
+        // 공통 rPr (Semilight)
+        const rPrSL = `<w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic Semilight" w:hint="eastAsia"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr>`;
+        // 인 글자용 rPr (hint 없음)
+        const rPrIN = `<w:rPr><w:rFonts w:ascii="Malgun Gothic" w:eastAsia="Malgun Gothic" w:hAnsi="Malgun Gothic" w:cs="Malgun Gothic"/><w:spacing w:val="3"/><w:sz w:val="20"/><w:szCs w:val="20"/><w:lang w:eastAsia="ko-KR"/></w:rPr>`;
+        const openTag = oldPara.match(/^<w:p [^>]+>/)?.[0] || `<w:p w14:paraId="${PARA_ID}">`;
+        const newPara =
+          openTag +
+          pPr +
+          // 이름 run
+          `<w:r w:rsidRPr="008A09BA">${rPrSL}<w:t xml:space="preserve">${repName}     (</w:t></w:r>` +
+          // 인 run
+          `<w:r w:rsidRPr="008A09BA">${rPrIN}<w:t>인</w:t></w:r>` +
+          // ) run
+          `<w:r w:rsidRPr="008A09BA">${rPrSL}<w:t xml:space="preserve">) </w:t></w:r>` +
+          `</w:p>`;
+        xml = xml.slice(0, pStart) + newPara + xml.slice(pEnd);
+      }
+    }
 
     // 12. ZIP 업데이트 후 blob 생성
     zip.file("word/document.xml", xml);
