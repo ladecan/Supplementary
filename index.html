@@ -133,7 +133,7 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     <div class="sec-hd">기본 정보</div>
     <div class="f"><label>구매계약서 번호 <span class="req">*</span></label><input type="text" id="cNo" value="" oninput="render()"></div>
     <div class="row2">
-      <div class="f"><label>계약서 체결일자</label><input type="date" id="cDate" value="" onchange="render()"></div>
+      <div class="f"><label>계약서 체결일자</label><input type="date" id="cDate" value="" onchange="onCDateChange()"></div>
       <div class="f"><label>부속합의 일자</label><input type="date" id="aDate" value="" onchange="onADateChange()"></div>
     </div>
   </div>
@@ -349,6 +349,18 @@ function renderRows(arr,cid,NL,NameL){
 function addRow(t){if(t==="b"){bIt.push({no:"",name:"",qty:1});renderRows(bIt,"bRows",NUMS_A,NAMES_A);}else{aIt.push({no:"",name:"",qty:1});renderRows(aIt,"aRows",NUMS_A,NAMES_A);}render();}
 
 function tblH(arr){const rows=arr.map(r=>`<tr><td class="c">${esc(r.no)}</td><td>${esc(r.name)}</td><td class="c">${r.qty}</td></tr>`).join("");return`<table class="doc-tbl"><thead><tr><th style="width:150px">구성품 번호</th><th>구성품</th><th style="width:55px">수량</th></tr></thead><tbody>${rows}</tbody></table>`;}
+
+function onCDateChange(){
+  const d = document.getElementById("cDate").value;
+  if(d){
+    const compact = d.replace(/-/g,"");
+    const cNo = document.getElementById("cNo");
+    if(!cNo.value || /^\d{8}/.test(cNo.value)){
+      cNo.value = compact;
+    }
+  }
+  render();
+}
 
 function onADateChange(){
   const d = document.getElementById("aDate").value; // "2026-04-02"
