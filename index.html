@@ -365,15 +365,6 @@ function onCDateChange(){
 }
 
 function onADateChange(){
-  const d = document.getElementById("aDate").value; // "2026-04-02"
-  if(d){
-    const compact = d.replace(/-/g,""); // "20260402"
-    const cNo = document.getElementById("cNo");
-    // 비어있거나 이전 날짜 패턴(숫자8자리로 시작)이면 덮어씀
-    if(!cNo.value || /^\d{8}/.test(cNo.value)){
-      cNo.value = compact;
-    }
-  }
   render();
 }
 
