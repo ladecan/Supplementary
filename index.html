@@ -132,7 +132,9 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
 <div class="form-scroll">
   <div class="sec">
     <div class="sec-hd">기본 정보 <span style="font-size:10px;font-weight:400;color:#e05c5c;margin-left:8px;">⚠ 변경 전 + 변경 후 구성품 합계 6개 초과 시 2페이지로 넘어갈 수 있음</span></div>
-    <div class="f"><label>구매계약서 번호 <span class="req">*</span></label><input type="text" id="cNo" value="" oninput="render()"></div>
+    <div class="f"><label>구매계약서 번호 <span class="req">*</span></label>
+      <input type="text" id="cNo" value="" oninput="render()" style="width:100%;">
+    </div>
     <div class="row2">
       <div class="f"><label>계약서 체결일자</label><input type="date" id="cDate" value="" onchange="onCDateChange()"></div>
       <div class="f"><label>부속합의 일자</label><input type="date" id="aDate" value="" onchange="onADateChange()"></div>
@@ -166,10 +168,14 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
   </div>
   <div class="sec">
     <div class="sec-hd">구매자</div>
-    <div class="buyer-chips">
+    <div class="buyer-chips" style="align-items:center;">
       <button class="chip on" onclick="setBuyer('inomed',this)">㈜이노메드</button>
       <button class="chip" onclick="setBuyer('sevenu',this)">쎄븐유</button>
       <button class="chip" onclick="setBuyer('custom',this)">직접 입력</button>
+      <input type="text" id="cCode" value="" placeholder="납품 병원명 필수"
+        oninput="this.style.borderColor='';this.placeholder='납품 병원명 필수';render()"
+        style="display:none;flex:1;min-width:0;height:28px;padding:0 8px;font-size:11px;border:1.5px solid #e05c5c;border-radius:5px;font-family:'Noto Sans KR',sans-serif;"
+        title="납품 병원명을 입력하세요">
     </div>
     <div class="f"><label>회사 / 병원명 <span class="req">*</span></label><input type="text" id="bName" oninput="markCustom();render()"></div>
     <div class="f">
@@ -265,8 +271,8 @@ const NAMES_A=["GMPP DCD Small","GMPP DCD Medium","GMPP DCD Large","GMPP ACC Lar
 const NO2N={"7123-CE-0650":"GMPP DCD Small","7123-CE-0632":"GMPP DCD Medium","7123-CE-0652":"GMPP DCD Large","7123-CE-0653":"GMPP ACC Large","FIN100834":"Zimmer Cryo7","FIN101958":"GMPP Modified LSDS Options Kit for DCD","FIN101959":"GMPP Modified LSDS Options Kit for ACC","FIN103337":"MSDS DCD Options Kit GMPP"};
 const N2NO=Object.fromEntries(Object.entries(NO2N).map(([k,v])=>[v,k]));
 const BUYERS={
-  inomed:{name:"㈜이노메드",addr1:"서울시 용산구 한강대로 257 2층,4층(갈월동,청룡빌딩) (04322)",addr2:"",rep:"변승환",biz:"106-81-97189"},
-  sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111, 부산지식산업센터 102 호(46508)",addr2:"",rep:"이호재",biz:"551-88-01183"}
+  inomed:{name:"㈜이노메드",addr1:"서울시 용산구 한강대로 257 2층,4층(갈월동,청룡빌딩) (04322)",addr2:"",rep:"변승환",biz:"106-81-97189",code:"이노메드"},
+  sevenu:{name:"㈜쎄븐유",addr1:"부산시 북구 효열로 111, 부산지식산업센터 102 호(46508)",addr2:"",rep:"이호재",biz:"551-88-01183",code:"쎄븐유"}
 };
 
 let bIt=[];
@@ -312,7 +318,25 @@ function fmtBiz(el){
 function dateKo(s){if(!s)return"";const[y,m,d]=s.split("-");return`${y}년 ${+m}월 ${+d}일`;}
 function toast(msg,ok=true){const t=$("toast");t.textContent=msg;t.style.background=ok?"#1e3a5f":"#8b2030";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2800);}
 
-function setBuyer(key,btn){document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));btn.classList.add("on");if(key==="custom"){set("bName","");set("bAddr1","");set("bAddr2","");set("bRep","");set("bBiz","");$("bName").focus();}else{const d=BUYERS[key];set("bName",d.name);set("bAddr1",d.addr1||d.addr||"");set("bAddr2",d.addr2||"");set("bRep",d.rep);set("bBiz",d.biz);}render();}
+function setBuyer(key,btn){
+  document.querySelectorAll(".chip").forEach(c=>c.classList.remove("on"));
+  btn.classList.add("on");
+  const cCodeEl = document.getElementById("cCode");
+  if(key==="custom"){
+    set("bName","");set("bAddr1","");set("bAddr2","");set("bRep","");set("bBiz","");
+    set("cCode","");
+    cCodeEl.style.display="none";
+    $("bName").focus();
+  } else {
+    const d=BUYERS[key];
+    set("bName",d.name);set("bAddr1",d.addr1||d.addr||"");set("bAddr2",d.addr2||"");
+    set("bRep",d.rep);set("bBiz",d.biz);
+    set("cCode","");
+    cCodeEl.style.display="";
+    cCodeEl.focus();
+  }
+  render();
+}
 function markCustom(){document.querySelectorAll(".chip").forEach((c,i)=>c.classList.toggle("on",i===2));}
 
 function numOpts(nums,sel){return`<option value="">— 선택 —</option>`+nums.map(n=>`<option value="${n}"${sel===n?" selected":""}>${n}</option>`).join("")+`<option value="__"${sel==="__"?" selected":""}>직접 입력</option>`;}
@@ -373,7 +397,7 @@ function render(){
   $("doc").innerHTML=`<div class="doc-wm">CANDELA KOREA</div>
 <div class="doc-title">부속 합의서</div>
 <div class="doc-meta">
-  <div class="doc-meta-row"><span class="doc-meta-lbl">구매계약서 번호</span><span class="doc-meta-colon">:</span><span class="doc-meta-val">${esc(val("cNo"))}</span></div>
+  <div class="doc-meta-row"><span class="doc-meta-lbl">구매계약서 번호</span><span class="doc-meta-colon">:</span><span class="doc-meta-val">${esc(val("cNo")+(val("cCode")?" ("+val("cCode")+")":""))}</span></div>
   <div class="doc-meta-row"><span class="doc-meta-lbl">구매계약서 체결일자</span><span class="doc-meta-colon">:</span><span class="doc-meta-val">${dateKo(val("cDate"))}</span></div>
   <div class="doc-meta-row"><span class="doc-meta-lbl">부속 합의 일자</span><span class="doc-meta-colon">:</span><span class="doc-meta-val">${dateKo(val("aDate"))}</span></div>
 </div>
@@ -481,6 +505,16 @@ function replaceSdtValue(xml, sdtIndex, newValue) {
 // ── Word 저장 (원본 docx XML 수정) ───────────────────────────────
 async function exportWord() {
   const btn = $("wBtn");
+
+  // cCode 입력란이 보이는 상태(이노메드/쎄븐유)인데 비어있으면 저장 막기
+  const cCodeEl = document.getElementById("cCode");
+  if (cCodeEl.style.display !== "none" && !val("cCode")) {
+    cCodeEl.style.borderColor = "#e05c5c";
+    cCodeEl.placeholder = "⚠ 병원명을 입력하세요!";
+    cCodeEl.focus();
+    return;
+  }
+
   btn.textContent = "⏳ 생성 중...";
   btn.disabled = true;
   try {
@@ -488,8 +522,9 @@ async function exportWord() {
     const zip = await JSZip.loadAsync(TEMPLATE_B64, {base64: true});
     let xml = await zip.file("word/document.xml").async("string");
 
-    // 2. 계약서 번호
-    xml = replaceInXml(xml, "20241206001", val("cNo"), 1);
+    // 2. 계약서 번호 (거래처 코드 있으면 뒤에 (코드) 추가)
+    const cNoFull = val("cNo") + (val("cCode") ? " ("+val("cCode")+")" : "");
+    xml = replaceInXml(xml, "20241206001", cNoFull, 1);
 
     // 3. 계약서 체결일 — paraId 322EF09F 문단 안에서만 치환 (월/일 버그 방지)
     const cDateRaw = val("cDate");
