@@ -698,8 +698,9 @@ async function exportWord() {
     const a = document.createElement("a");
     a.href = url;
     const buyShort = val("bName").replace(/[㈜()]/g,"").trim().slice(0,6);
+    const cCodeVal = val("cCode").trim();
     const ds = val("aDate").replace(/-/g,"");
-    a.download = `부속합의서_${buyShort}_${ds}.docx`;
+    a.download = `부속합의서_${buyShort}${cCodeVal ? "("+cCodeVal+")" : ""}_${ds}.docx`;
     a.click();
     URL.revokeObjectURL(url);
     toast("✓ Word 파일이 저장되었습니다");
