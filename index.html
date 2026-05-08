@@ -131,13 +131,14 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
 
 .addr-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center}
 .addr-modal-ov.open{display:flex}
-.addr-modal-box{background:#fff;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:460px;max-width:95vw;display:flex;flex-direction:column;overflow:hidden}
-.addr-modal-hd{padding:12px 16px;background:var(--navy);display:flex;align-items:center;justify-content:space-between}
+.addr-modal-box{background:#fff;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:460px;max-width:95vw;display:flex;flex-direction:column;overflow:visible}
+.addr-modal-hd{padding:12px 16px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;border-radius:8px 8px 0 0}
 .addr-modal-hd span{color:#fff;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif}
 .addr-modal-x{border:none;background:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px}
 .addr-modal-x:hover{color:#fff}
-.addr-modal-input-wrap{padding:12px 14px;border-bottom:1px solid var(--bdr)}
+.addr-modal-input-wrap{padding:12px 14px;border-bottom:1px solid var(--bdr);background:#fff}
 .addr-modal-input-wrap input{width:100%;padding:8px 11px;border:1.5px solid var(--navy);border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none}
+.addr-results{max-height:300px;overflow-y:auto;background:#fff;border-radius:0 0 8px 8px}
 .addr-results{max-height:300px;overflow-y:auto}
 .addr-results::-webkit-scrollbar{width:4px}
 .addr-results::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
@@ -399,7 +400,8 @@ function onAddrModalInput(input) {
           const node = document.createElement("div");
           node.className = "addr-result-item";
           node.innerHTML = `<div class="ri-name">${item.place_name}</div><div class="ri-addr">${addr}</div>`;
-          node.onclick = () => {
+          node.onmousedown = (e) => {
+            e.preventDefault();
             if (_kakaoPS) {
               _kakaoPS.addressSearch(addr, (addrResults, addrStatus) => {
                 let zip = "";
