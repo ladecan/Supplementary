@@ -110,47 +110,9 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
 .btn-msave:hover{background:#9a7a58}
 .btn-preview{display:flex;align-items:center;gap:7px;padding:7px 15px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;margin-right:8px}
 .btn-preview:hover{background:rgba(255,255,255,.25)}
-/* ── 업데이트 안내 모달 ── */
-.changelog-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1200;align-items:center;justify-content:center}
-.changelog-ov.open{display:flex}
-.changelog-box{background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:420px;max-width:95vw;overflow:hidden}
-.changelog-hd{background:var(--navy);padding:16px 20px;display:flex;align-items:center;gap:10px}
-.changelog-hd-txt{flex:1}
-.changelog-hd-txt h3{color:#fff;font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;margin:0}
-.changelog-hd-txt span{color:rgba(255,255,255,.55);font-size:10px;font-family:'Noto Sans KR',sans-serif}
-.changelog-body{padding:20px 22px}
-.changelog-item{display:flex;gap:10px;margin-bottom:13px;align-items:flex-start}
-.changelog-item:last-child{margin-bottom:0}
-.cl-badge{flex-shrink:0;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:'Noto Sans KR',sans-serif}
-.cl-new{background:var(--navy-lt);color:var(--navy)}
-.cl-fix{background:var(--grn-lt);color:var(--grn)}
-.cl-txt{font-size:12px;color:var(--tx2);font-family:'Noto Sans KR',sans-serif;line-height:1.6}
-.changelog-ft{padding:14px 22px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end}
-.btn-changelog-close{padding:7px 22px;background:var(--navy);color:#fff;border:none;border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
-.btn-changelog-close:hover{background:#162e4d}
-
-.addr-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center}
-.addr-modal-ov.open{display:flex}
-.addr-modal-box{background:#fff;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:460px;max-width:95vw;display:flex;flex-direction:column;overflow:visible}
-.addr-modal-hd{padding:12px 16px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;border-radius:8px 8px 0 0}
-.addr-modal-hd span{color:#fff;font-size:13px;font-weight:600;font-family:'Noto Sans KR',sans-serif}
-.addr-modal-x{border:none;background:none;color:rgba(255,255,255,.7);font-size:20px;cursor:pointer;line-height:1;padding:2px 6px}
-.addr-modal-x:hover{color:#fff}
-.addr-modal-input-wrap{padding:12px 14px;border-bottom:1px solid var(--bdr);background:#fff}
-.addr-modal-input-wrap input{width:100%;padding:8px 11px;border:1.5px solid var(--navy);border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:13px;outline:none}
-.addr-results{max-height:300px;overflow-y:auto;background:#fff;border-radius:0 0 8px 8px}
-.addr-results{max-height:300px;overflow-y:auto}
-.addr-results::-webkit-scrollbar{width:4px}
-.addr-results::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px}
-.addr-result-item{padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--bdr-lt);font-family:'Noto Sans KR',sans-serif}
-.addr-result-item:last-child{border-bottom:none}
-.addr-result-item:hover{background:var(--navy-xl)}
-.addr-result-item .ri-name{font-size:13px;font-weight:600;color:var(--tx)}
-.addr-result-item .ri-addr{font-size:11px;color:var(--tx3);margin-top:2px}
-.addr-result-empty{padding:32px;text-align:center;color:var(--tx3);font-size:12px;font-family:'Noto Sans KR',sans-serif}
 </style>
-<!-- 카카오 장소검색 API -->
-<script src="https://dapi.kakao.com/v2/maps/sdk.js?appkey=9eb81b2d9508d3c7222269657b22d9a6&libraries=services&autoload=false"></script>
+<!-- 다음 주소검색 API (인터넷 연결 시 사용 가능) -->
+<script src="https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
 <body>
 <header>
@@ -219,8 +181,8 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     <div class="f">
       <label>주소</label>
       <div style="display:flex;gap:6px">
-        <input type="text" id="bAddr1" placeholder="주소" oninput="render()" style="flex:1">
-        <button onclick="openAddrModal()" style="padding:6px 12px;background:var(--navy);color:#fff;border:none;border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">🔍 주소검색</button>
+        <input type="text" id="bAddr1" placeholder="주소 (도로명 또는 지번)" oninput="render()" style="flex:1">
+        <button onclick="searchAddr()" style="padding:6px 12px;background:var(--navy);color:#fff;border:none;border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0">🔍 주소검색</button>
       </div>
       <input type="hidden" id="bAddr2" value="">
     </div>
@@ -238,47 +200,6 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
   </div>
   <div class="prev-scroll"><div class="doc" id="doc"></div></div>
 </main>
-</div>
-<div class="changelog-ov" id="changelogModal">
-  <div class="changelog-box">
-    <div class="changelog-hd">
-      <div class="changelog-hd-txt">
-        <h3>📋 업데이트 안내</h3>
-        <span>v2026.05.08</span>
-      </div>
-    </div>
-    <div class="changelog-body">
-      <div class="changelog-item">
-        <span class="cl-badge cl-new">NEW</span>
-        <span class="cl-txt">주소 검색을 장소명으로 검색할 수 있도록 변경 (카카오 장소검색)</span>
-      </div>
-      <div class="changelog-item">
-        <span class="cl-badge cl-new">NEW</span>
-        <span class="cl-txt">주소 선택 시 우편번호 자동 입력</span>
-      </div>
-      <div class="changelog-item">
-        <span class="cl-badge cl-fix">FIX</span>
-        <span class="cl-txt">파일명 구매자명 6자 제한 → 15자로 확대 및 특수문자 자동 제거</span>
-      </div>
-    </div>
-    <div class="changelog-ft">
-      <button class="btn-changelog-close" onclick="closeChangelog()">확인</button>
-    </div>
-  </div>
-</div>
-<div class="addr-modal-ov" id="addrModal">
-  <div class="addr-modal-box">
-    <div class="addr-modal-hd">
-      <span>🔍 주소 검색</span>
-      <button class="addr-modal-x" onclick="closeAddrModal()">×</button>
-    </div>
-    <div class="addr-modal-input-wrap">
-      <input type="text" id="addrModalInput" placeholder="병원명, 장소명, 주소로 검색" oninput="onAddrModalInput(this)" autocomplete="off">
-    </div>
-    <div class="addr-results" id="addrResults">
-      <div class="addr-result-empty">검색어를 입력하세요</div>
-    </div>
-  </div>
 </div>
 <div class="modal-ov" id="previewModal" onclick="if(event.target===this)closePreview()">
   <div class="modal-box">
@@ -362,72 +283,30 @@ const val=id=>$(id).value.trim();
 const set=(id,v)=>{$(id).value=v};
 const esc=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 function fmtAmt(el){const n=el.value.replace(/[^0-9]/g,"");el.value=n?parseInt(n).toLocaleString("ko-KR"):"";}
-// ── 카카오 장소검색 ────────────────────────────────────────────────
-let _kakaoPS = null;
-let _addrDebounce = null;
-
-function _initKakao() {
-  if (typeof kakao !== "undefined" && kakao.maps) {
-    kakao.maps.load(() => { _kakaoPS = new kakao.maps.services.Places(); });
-  } else {
-    setTimeout(_initKakao, 300);
+function searchAddr() {
+  // 다음 주소 API가 로드됐는지 확인
+  if (typeof daum === "undefined" || !daum.Postcode) {
+    toast("주소검색은 인터넷 연결이 필요합니다", false);
+    return;
   }
-}
-_initKakao();
-
-function openAddrModal() {
-  document.getElementById("addrModal").classList.add("open");
-  setTimeout(() => document.getElementById("addrModalInput").focus(), 80);
-}
-function closeAddrModal() {
-  document.getElementById("addrModal").classList.remove("open");
-  document.getElementById("addrModalInput").value = "";
-  document.getElementById("addrResults").innerHTML = '<div class="addr-result-empty">검색어를 입력하세요</div>';
-}
-
-function onAddrModalInput(input) {
-  const query = input.value.trim();
-  const results = document.getElementById("addrResults");
-  clearTimeout(_addrDebounce);
-  if (!query) { results.innerHTML = '<div class="addr-result-empty">검색어를 입력하세요</div>'; return; }
-  _addrDebounce = setTimeout(() => {
-    if (!_kakaoPS) { results.innerHTML = '<div class="addr-result-empty">카카오 서비스 연결 중...</div>'; return; }
-    _kakaoPS.keywordSearch(query, (items, status) => {
-      results.innerHTML = "";
-      if (status === kakao.maps.services.Status.OK) {
-        items.slice(0, 10).forEach(item => {
-          const addr = item.road_address_name || item.address_name;
-          const node = document.createElement("div");
-          node.className = "addr-result-item";
-          node.innerHTML = `<div class="ri-name">${item.place_name}</div><div class="ri-addr">${addr}</div>`;
-          node.onmousedown = (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            if (_kakaoPS) {
-              _kakaoPS.addressSearch(addr, (addrResults, addrStatus) => {
-                let zip = "";
-                if (addrStatus === kakao.maps.services.Status.OK && addrResults[0]) {
-                  zip = addrResults[0].road_address?.zone_no || addrResults[0].address?.zip_code || "";
-                }
-                document.getElementById("bAddr1").value = addr + (zip ? ` (${zip})` : "");
-                closeAddrModal();
-                markCustom();
-                render();
-              });
-            } else {
-              document.getElementById("bAddr1").value = addr;
-              closeAddrModal();
-              markCustom();
-              render();
-            }
-          };
-          results.appendChild(node);
-        });
-      } else {
-        results.innerHTML = '<div class="addr-result-empty">검색 결과가 없습니다</div>';
-      }
-    });
-  }, 250);
+  new daum.Postcode({
+    oncomplete: function(data) {
+      // 도로명 주소 우선, 없으면 지번
+      const addr1 = data.roadAddress || data.jibunAddress;
+      // 전체 주소 (우편번호 포함) 한 줄로
+      document.getElementById("bAddr1").value = addr1 + " (" + data.zonecode + ")";
+      document.getElementById("bAddr2").value = "";
+      // 구매자 칩을 직접입력으로 전환
+      markCustom();
+      render();
+    },
+    theme: {
+      bgColor: "#1e3a5f",
+      titleColor: "#ffffff",
+      searchBgColor: "#2c4e7a",
+      queryTextColor: "#ffffff",
+    }
+  }).open();
 }
 
 function fmtBiz(el){
@@ -836,21 +715,12 @@ async function exportWord() {
 
 // ── 초기화 ────────────────────────────────────────────────────────
 (function(){
+  // 초기 상태: 모든 칩 비활성, 구매자 빈칸
   document.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
   renderRows(bIt,"bRows",NUMS_A,NAMES_A);
   renderRows(aIt,"aRows",NUMS_A,NAMES_A);
   render();
-  // 업데이트 안내 — 이 버전을 처음 여는 경우에만 표시
-  const CL_KEY = "candela_seen_v2026.05.08";
-  if (!localStorage.getItem(CL_KEY)) {
-    document.getElementById("changelogModal").classList.add("open");
-  }
 })();
-
-function closeChangelog() {
-  document.getElementById("changelogModal").classList.remove("open");
-  localStorage.setItem("candela_seen_v2026.05.08", "1");
-}
 </script>
 </body>
 </html>
