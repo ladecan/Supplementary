@@ -266,7 +266,7 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     </div>
   </div>
 </div>
-<div class="addr-modal-ov" id="addrModal" onclick="if(event.target===this)closeAddrModal()">
+<div class="addr-modal-ov" id="addrModal">
   <div class="addr-modal-box">
     <div class="addr-modal-hd">
       <span>🔍 주소 검색</span>
@@ -402,6 +402,7 @@ function onAddrModalInput(input) {
           node.innerHTML = `<div class="ri-name">${item.place_name}</div><div class="ri-addr">${addr}</div>`;
           node.onmousedown = (e) => {
             e.preventDefault();
+            e.stopPropagation();
             if (_kakaoPS) {
               _kakaoPS.addressSearch(addr, (addrResults, addrStatus) => {
                 let zip = "";
@@ -419,9 +420,6 @@ function onAddrModalInput(input) {
               markCustom();
               render();
             }
-            closeAddrModal();
-            markCustom();
-            render();
           };
           results.appendChild(node);
         });
