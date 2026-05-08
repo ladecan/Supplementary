@@ -110,7 +110,25 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
 .btn-msave:hover{background:#9a7a58}
 .btn-preview{display:flex;align-items:center;gap:7px;padding:7px 15px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.35);border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;margin-right:8px}
 .btn-preview:hover{background:rgba(255,255,255,.25)}
-/* ── 장소검색 팝업 모달 ── */
+/* ── 업데이트 안내 모달 ── */
+.changelog-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1200;align-items:center;justify-content:center}
+.changelog-ov.open{display:flex}
+.changelog-box{background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:420px;max-width:95vw;overflow:hidden}
+.changelog-hd{background:var(--navy);padding:16px 20px;display:flex;align-items:center;gap:10px}
+.changelog-hd-txt{flex:1}
+.changelog-hd-txt h3{color:#fff;font-size:14px;font-weight:700;font-family:'Noto Sans KR',sans-serif;margin:0}
+.changelog-hd-txt span{color:rgba(255,255,255,.55);font-size:10px;font-family:'Noto Sans KR',sans-serif}
+.changelog-body{padding:20px 22px}
+.changelog-item{display:flex;gap:10px;margin-bottom:13px;align-items:flex-start}
+.changelog-item:last-child{margin-bottom:0}
+.cl-badge{flex-shrink:0;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700;font-family:'Noto Sans KR',sans-serif}
+.cl-new{background:var(--navy-lt);color:var(--navy)}
+.cl-fix{background:var(--grn-lt);color:var(--grn)}
+.cl-txt{font-size:12px;color:var(--tx2);font-family:'Noto Sans KR',sans-serif;line-height:1.6}
+.changelog-ft{padding:14px 22px;border-top:1px solid var(--bdr);display:flex;justify-content:flex-end}
+.btn-changelog-close{padding:7px 22px;background:var(--navy);color:#fff;border:none;border-radius:5px;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:600;cursor:pointer}
+.btn-changelog-close:hover{background:#162e4d}
+
 .addr-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1100;align-items:center;justify-content:center}
 .addr-modal-ov.open{display:flex}
 .addr-modal-box{background:#fff;border-radius:8px;box-shadow:0 20px 60px rgba(0,0,0,.3);width:460px;max-width:95vw;display:flex;flex-direction:column;overflow:hidden}
@@ -219,6 +237,33 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
   </div>
   <div class="prev-scroll"><div class="doc" id="doc"></div></div>
 </main>
+</div>
+<div class="changelog-ov" id="changelogModal">
+  <div class="changelog-box">
+    <div class="changelog-hd">
+      <div class="changelog-hd-txt">
+        <h3>📋 업데이트 안내</h3>
+        <span>v2026.05.08</span>
+      </div>
+    </div>
+    <div class="changelog-body">
+      <div class="changelog-item">
+        <span class="cl-badge cl-new">NEW</span>
+        <span class="cl-txt">주소 검색을 장소명으로 검색할 수 있도록 변경 (카카오 장소검색)</span>
+      </div>
+      <div class="changelog-item">
+        <span class="cl-badge cl-new">NEW</span>
+        <span class="cl-txt">주소 선택 시 우편번호 자동 입력</span>
+      </div>
+      <div class="changelog-item">
+        <span class="cl-badge cl-fix">FIX</span>
+        <span class="cl-txt">파일명 구매자명 6자 제한 → 15자로 확대 및 특수문자 자동 제거</span>
+      </div>
+    </div>
+    <div class="changelog-ft">
+      <button class="btn-changelog-close" onclick="closeChangelog()">확인</button>
+    </div>
+  </div>
 </div>
 <div class="addr-modal-ov" id="addrModal" onclick="if(event.target===this)closeAddrModal()">
   <div class="addr-modal-box">
@@ -791,12 +836,21 @@ async function exportWord() {
 
 // ── 초기화 ────────────────────────────────────────────────────────
 (function(){
-  // 초기 상태: 모든 칩 비활성, 구매자 빈칸
   document.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
   renderRows(bIt,"bRows",NUMS_A,NAMES_A);
   renderRows(aIt,"aRows",NUMS_A,NAMES_A);
   render();
+  // 업데이트 안내 — 이 버전을 처음 여는 경우에만 표시
+  const CL_KEY = "candela_seen_v2026.05.08";
+  if (!localStorage.getItem(CL_KEY)) {
+    document.getElementById("changelogModal").classList.add("open");
+  }
 })();
+
+function closeChangelog() {
+  document.getElementById("changelogModal").classList.remove("open");
+  localStorage.setItem("candela_seen_v2026.05.08", "1");
+}
 </script>
 </body>
 </html>
