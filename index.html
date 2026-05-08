@@ -140,7 +140,7 @@ header{background:var(--navy);color:#fff;padding:0 28px;height:52px;display:flex
     <div class="hd-dot"></div>
     <span class="hd-sub">부속합의서 생성기</span>
   </div>
-  <span style="font-size:10px;color:rgba(255,255,255,0.45);position:absolute;top:6px;right:130px;letter-spacing:0.3px;font-family:'Noto Sans KR',sans-serif;">v2026.04.16 14:44</span>
+  <span style="font-size:10px;color:rgba(255,255,255,0.45);position:absolute;top:6px;right:130px;letter-spacing:0.3px;font-family:'Noto Sans KR',sans-serif;">v2026.05.08</span>
   <button class="btn-word" id="wBtn" onclick="exportWord()">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
     Word로 저장
@@ -355,7 +355,23 @@ function onAddrModalInput(input) {
           node.className = "addr-result-item";
           node.innerHTML = `<div class="ri-name">${item.place_name}</div><div class="ri-addr">${addr}</div>`;
           node.onclick = () => {
-            document.getElementById("bAddr1").value = addr;
+            if (_kakaoPS) {
+              _kakaoPS.addressSearch(addr, (addrResults, addrStatus) => {
+                let zip = "";
+                if (addrStatus === kakao.maps.services.Status.OK && addrResults[0]) {
+                  zip = addrResults[0].road_address?.zone_no || addrResults[0].address?.zip_code || "";
+                }
+                document.getElementById("bAddr1").value = addr + (zip ? ` (${zip})` : "");
+                closeAddrModal();
+                markCustom();
+                render();
+              });
+            } else {
+              document.getElementById("bAddr1").value = addr;
+              closeAddrModal();
+              markCustom();
+              render();
+            }
             closeAddrModal();
             markCustom();
             render();
